@@ -10,3 +10,6 @@ export { TextField } from './TextField';
 export { ComingSoon } from './ComingSoon';
 export { OptionGroup } from './OptionGroup';
 export { SwitchRow } from './SwitchRow';
+export { ChipGroup } from './ChipGroup';
+export { DateTimeField } from './DateTimeField';
+export { BarChart } from './BarChart';

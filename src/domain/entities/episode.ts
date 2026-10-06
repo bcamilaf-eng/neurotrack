@@ -154,15 +154,17 @@ export function isLongEpisode(data: Pick<EpisodeData, 'startedAt' | 'endedAt'>):
   return minutes !== null && minutes > LONG_EPISODE_WARNING_MIN;
 }
 
-/** Dos episodios se solapan si sus intervalos comparten algún instante. */
+/**
+ * Dos episodios se solapan si sus intervalos comparten algún instante.
+ * Un episodio sin fin (en curso) sigue abierto: se solapa con todo lo posterior a su inicio.
+ */
 export function intervalsOverlap(
   a: { startedAt: string; endedAt?: string | null },
   b: { startedAt: string; endedAt?: string | null },
-  now: Date = new Date(),
 ): boolean {
   const aStart = Date.parse(a.startedAt);
-  const aEnd = a.endedAt ? Date.parse(a.endedAt) : now.getTime();
+  const aEnd = a.endedAt ? Date.parse(a.endedAt) : Infinity;
   const bStart = Date.parse(b.startedAt);
-  const bEnd = b.endedAt ? Date.parse(b.endedAt) : now.getTime();
+  const bEnd = b.endedAt ? Date.parse(b.endedAt) : Infinity;
   return aStart < bEnd && bStart < aEnd;
 }

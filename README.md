@@ -12,8 +12,8 @@ tratamiento de un profesional de salud.
 
 | Hito | Etapas | Estado |
 | --- | --- | --- |
-| 1. Base | Arquitectura, autenticación, base de datos | ✅ Esta versión |
-| 2. Registro clínico | Dashboard, episodios, síntomas y desencadenantes | Pendiente |
+| 1. Base | Arquitectura, autenticación, base de datos | ✅ Hecho |
+| 2. Registro clínico | Dashboard, episodios, síntomas y desencadenantes | ✅ Esta versión |
 | 3. Tratamiento y hábitos | Medicación, sueño, hidratación, alimentación, estado diario | Pendiente |
 | 4. Visualización y análisis | Calendario, estadísticas, patrones | Pendiente |
 | 5. Seguridad del paciente | Alertas, informes PDF/CSV, notificaciones | Pendiente |
@@ -32,6 +32,18 @@ tratamiento de un profesional de salud.
 - Perfil opcional, contacto de emergencia, centro de privacidad y eliminación de cuenta.
 - Esquema de Supabase con Row Level Security y función de borrado de cuenta.
 - 80 pruebas automatizadas.
+
+### Qué incluye el hito 2
+
+- Registro de episodio en 5 pasos; solo el primero (cuándo y cuánto duele) es obligatorio.
+- Fecha y horas con el selector nativo, duración automática (incluye episodios que cruzan la medianoche o duran varios días).
+- Escala de dolor 0–10 con número, banda (leve, moderado…) y color con contraste AA.
+- Mapa de la cabeza (frente y nuca) sincronizado con la lista de localizaciones, que es la que usan los lectores de pantalla.
+- Síntomas con detalle del aura y posibles desencadenantes («No identificado» es excluyente).
+- Aviso de posible duplicado («Ver el existente» o «Guardar igualmente»), confirmación de episodios de más de 72 h y aviso al salir con cambios sin guardar.
+- Detalle del episodio con línea temporal: anotar la intensidad actual o una nota, cerrar un episodio en curso, editar y eliminar con confirmación.
+- Inicio con resumen del mes, días desde el último episodio, acciones rápidas, «día sin dolor» y gráficos de las últimas 8 semanas.
+- 101 pruebas automatizadas.
 
 Las secciones de los hitos siguientes aparecen en la app marcadas como «Próximamente».
 

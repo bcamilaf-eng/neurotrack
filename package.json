@@ -5,6 +5,7 @@
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/datetimepicker": "9.1.0",
     "@supabase/supabase-js": "^2.117.2",
     "date-fns": "^4.4.0",
     "expo": "~57.0.27",
@@ -61,6 +62,7 @@
     ],
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@supabase/.*|react-native-svg|zustand)"
-    ]
+    ],
+    "globalSetup": "<rootDir>/tests/globalSetup.js"
   }
 }
