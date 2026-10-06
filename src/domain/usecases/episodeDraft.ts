@@ -28,6 +28,8 @@ export interface EpisodeDraft {
   triggers: TriggerType[];
   foodDetail: string;
   triggerOther: string;
+  suddenOnset: boolean;
+  headTrauma: boolean;
   notes: string;
 }
 
@@ -51,6 +53,8 @@ export function emptyDraft(now: Date = new Date()): EpisodeDraft {
     triggers: [],
     foodDetail: '',
     triggerOther: '',
+    suddenOnset: false,
+    headTrauma: false,
     notes: '',
   };
 }
@@ -96,6 +100,8 @@ export function draftToInput(draft: EpisodeDraft): EpisodeInput {
       type,
       detail: type === 'specific_food' ? blank(draft.foodDetail) : type === 'other' ? blank(draft.triggerOther) : undefined,
     })),
+    suddenOnset: draft.suddenOnset || undefined,
+    headTrauma: draft.headTrauma || undefined,
     notes: blank(draft.notes),
   };
 }
@@ -122,6 +128,8 @@ export function inputToDraft(input: EpisodeInput): EpisodeDraft {
     triggers: (input.triggers ?? []).map((t) => t.type),
     foodDetail: input.triggers?.find((t) => t.type === 'specific_food')?.detail ?? '',
     triggerOther: input.triggers?.find((t) => t.type === 'other')?.detail ?? '',
+    suddenOnset: !!input.suddenOnset,
+    headTrauma: !!input.headTrauma,
     notes: input.notes ?? '',
   };
 }

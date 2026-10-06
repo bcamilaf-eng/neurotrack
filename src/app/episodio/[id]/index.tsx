@@ -18,12 +18,15 @@ import {
   TRIGGERS,
 } from '../../../domain/catalogs';
 import { ValidationError } from '../../../domain/errors';
+import type { EmergencyContact } from '../../../data/repositories/accountRepository';
+import type { AlarmFlag } from '../../../data/repositories/alarmRepository';
 import type { EpisodeEventRecord, EpisodeRecord } from '../../../data/repositories/episodeRepository';
 import type { MedicationRecord } from '../../../data/repositories/habitRepositories';
 import { getRepositories } from '../../../state/services';
 import { useSession } from '../../../state/sessionStore';
 import { AppText, Banner, Button, Card, Disclaimer, Screen, TextField } from '../../../ui/components';
 import { confirmDestructive } from '../../../ui/confirm';
+import { AlarmAlert } from '../../../ui/features/alerts/AlarmAlert';
 import { PainScale, painColor } from '../../../ui/features/episode/PainScale';
 import { medicationSummary, responseSummary } from '../../../ui/features/medication/format';
 import { spacing } from '../../../ui/theme';
@@ -84,6 +87,10 @@ export default function EpisodeDetailScreen() {
   const [episode, setEpisode] = useState<EpisodeRecord | null | undefined>(undefined);
   const [events, setEvents] = useState<EpisodeEventRecord[]>([]);
   const [medications, setMedications] = useState<MedicationRecord[]>([]);
+  const [alarm, setAlarm] = useState<{ flags: AlarmFlag[]; contact: EmergencyContact | null; country?: string }>({
+    flags: [],
+    contact: null,
+  });
   const [update, setUpdate] = useState<number | undefined>();
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +103,12 @@ export default function EpisodeDetailScreen() {
     setEpisode(record);
     setEvents(record ? await repos.episodes.listEvents(user.id, id) : []);
     setMedications(record ? await repos.medications.listForEpisode(user.id, id) : []);
+    const flags = record ? await repos.alarms.listForEpisode(user.id, id) : [];
+    if (flags.length) {
+      const [contact, profile] = await Promise.all([repos.account.getEmergencyContact(user.id), repos.account.getProfile(user.id)]);
+      setAlarm({ flags, contact, country: profile?.country });
+      if (flags.some((f) => !f.shownAt)) await repos.alarms.markShown(user.id, id);
+    } else setAlarm({ flags: [], contact: null });
   }, [user, id]);
 
   useFocusEffect(
@@ -183,6 +196,12 @@ export default function EpisodeDetailScreen() {
         </AppText>
         <AppText variant="title">Episodio registrado como {typeLabel.toLowerCase()}</AppText>
       </View>
+      <AlarmAlert
+        flags={alarm.flags}
+        contact={alarm.contact}
+        country={alarm.country}
+        onAcknowledge={() => run(async () => (await repos()).alarms.acknowledge(user!.id, id))}
+      />
       {episode.ongoing ? <Banner tone="info" title="En curso" message="Puedes anotar cómo evoluciona y cerrarlo cuando termine." /> : null}
       {error ? <Banner tone="danger" message={error} /> : null}
 

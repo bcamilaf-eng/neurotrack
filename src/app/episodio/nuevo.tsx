@@ -24,9 +24,14 @@ export default function NewEpisodeScreen() {
         return record.id;
       }}
       offerMedication
-      onSaved={(id, { addMedication }) => {
+      onSaved={async (id, { addMedication }) => {
+        // Si el registro tiene una señal de alarma, el aviso del detalle va primero.
+        const repos = await getRepositories();
+        const alarms = await repos.alarms.listForEpisode(user!.id, id);
         router.replace({ pathname: '/episodio/[id]', params: { id } });
-        if (addMedication) router.push({ pathname: '/registro/medicacion/nueva', params: { episodio: id } });
+        if (addMedication && alarms.length === 0) {
+          router.push({ pathname: '/registro/medicacion/nueva', params: { episodio: id } });
+        }
       }}
       onOpenExisting={(id) => router.replace({ pathname: '/episodio/[id]', params: { id } })}
     />

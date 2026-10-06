@@ -47,6 +47,8 @@ const EPISODE_COLUMNS: ColumnMap<EpisodeData> = {
   locationOther: { column: 'location_other', kind: 'text' },
   qualities: { column: 'qualities', kind: 'json' },
   qualityOther: { column: 'quality_other', kind: 'text' },
+  suddenOnset: { column: 'sudden_onset', kind: 'bool' },
+  headTrauma: { column: 'head_trauma', kind: 'bool' },
   notes: { column: 'notes', kind: 'text' },
 };
 
@@ -61,6 +63,12 @@ const EVENT_COLUMNS: ColumnMap<EpisodeEventData> = {
 const CHILD_TABLES = ['symptoms', 'aura_details', 'triggers'] as const;
 
 export class EpisodeRepository {
+  /**
+   * Se llama tras cada cambio de un episodio (crear, editar, cerrar, actualizar su
+   * evolución). `createRepositories` lo conecta con la evaluación de señales de alarma.
+   */
+  onChange?: (userId: string, episodeId: string) => Promise<unknown>;
+
   constructor(private readonly db: SqlDatabase) {}
 
   async create(userId: string, input: EpisodeInput, options: SaveOptions = {}): Promise<EpisodeRecord> {
@@ -73,12 +81,13 @@ export class EpisodeRepository {
         `INSERT INTO headache_episodes (
            id, user_id, created_at, updated_at, date, started_at, ended_at, ongoing, duration_min,
            type, type_other, intensity, max_intensity, locations, location_other, qualities,
-           quality_other, notes)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           quality_other, sudden_onset, head_trauma, notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [id, userId, now, now, ...this.episodeValues(data, data.intensity)],
       );
       await this.writeChildren(userId, id, data, now);
     });
+    await this.onChange?.(userId, id);
     return this.getOrThrow(userId, id);
   }
 
@@ -99,7 +108,7 @@ export class EpisodeRepository {
         `UPDATE headache_episodes SET
            date = ?, started_at = ?, ended_at = ?, ongoing = ?, duration_min = ?, type = ?,
            type_other = ?, intensity = ?, max_intensity = ?, locations = ?, location_other = ?,
-           qualities = ?, quality_other = ?, notes = ?, updated_at = ?, sync_status = 'pending'
+           qualities = ?, quality_other = ?, sudden_onset = ?, head_trauma = ?, notes = ?, updated_at = ?, sync_status = 'pending'
          WHERE id = ? AND user_id = ?`,
         [...this.episodeValues(data, maxIntensity), now, current.id, userId],
       );
@@ -112,6 +121,7 @@ export class EpisodeRepository {
       }
       await this.writeChildren(userId, id, data, now);
     });
+    await this.onChange?.(userId, id);
     return this.getOrThrow(userId, id);
   }
 
@@ -217,6 +227,7 @@ export class EpisodeRepository {
         );
       }
     });
+    await this.onChange?.(userId, episodeId);
     const events = await this.listEvents(userId, episodeId);
     return events.find((e) => e.id === id)!;
   }
@@ -230,6 +241,7 @@ export class EpisodeRepository {
     );
     if (result.changes === 0) throw new NotFoundError('La actualización');
     await this.recomputeMaxIntensity(userId, episodeId);
+    await this.onChange?.(userId, episodeId);
   }
 
   async listEvents(userId: string, episodeId: string): Promise<EpisodeEventRecord[]> {
@@ -272,6 +284,8 @@ export class EpisodeRepository {
       data.locationOther ?? null,
       JSON.stringify(data.qualities),
       data.qualityOther ?? null,
+      data.suddenOnset === undefined ? null : data.suddenOnset ? 1 : 0,
+      data.headTrauma === undefined ? null : data.headTrauma ? 1 : 0,
       data.notes ?? null,
     ];
   }
@@ -377,6 +391,8 @@ export class EpisodeRepository {
       symptoms: record.symptoms,
       aura: record.aura,
       triggers: record.triggers,
+      suddenOnset: record.suddenOnset,
+      headTrauma: record.headTrauma,
       notes: record.notes,
     };
   }

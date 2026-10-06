@@ -198,6 +198,15 @@ CREATE TABLE alarm_flags (${COMMON},
 CREATE INDEX alarm_flags_episode ON alarm_flags (episode_id);
 `,
   },
+  {
+    version: 2,
+    name: 'senales_alarma',
+    sql: `
+ALTER TABLE headache_episodes ADD COLUMN sudden_onset INTEGER CHECK (sudden_onset IS NULL OR sudden_onset IN (0, 1));
+ALTER TABLE headache_episodes ADD COLUMN head_trauma INTEGER CHECK (head_trauma IS NULL OR head_trauma IN (0, 1));
+CREATE INDEX alarm_flags_user_detected ON alarm_flags (user_id, detected_at);
+`,
+  },
 ];
 
 export const LATEST_SCHEMA_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version;
