@@ -34,7 +34,7 @@ import { useAppTheme } from '../../theme/ThemeContext';
 import { HeadMap } from './HeadMap';
 import { PainScale } from './PainScale';
 
-export const STEPS = ['Cuándo y cuánto', 'Cómo es el dolor', 'Síntomas', 'Desencadenantes', 'Notas'] as const;
+export const STEPS = ['Cuándo y cuánto', 'Cómo es el dolor', 'Síntomas', 'Desencadenantes', 'Medicación y notas'] as const;
 
 const FIELD_STEP: Record<string, number> = {
   date: 0, startTime: 0, endDate: 0, endTime: 0, startedAt: 0, endedAt: 0, intensity: 0, ongoing: 0,
@@ -58,8 +58,11 @@ export interface EpisodeFormProps {
   submitLabel: string;
   /** Guarda y devuelve el id del episodio. Puede lanzar `DuplicateError`. */
   onSave: (request: SaveRequest) => Promise<string>;
-  onSaved: (id: string) => void;
+  /** `addMedication`: el usuario quiere registrar ahora la medicación de este episodio. */
+  onSaved: (id: string, options: { addMedication: boolean }) => void;
   onOpenExisting?: (id: string) => void;
+  /** Muestra la opción de registrar la medicación al guardar (solo en episodios nuevos). */
+  offerMedication?: boolean;
 }
 
 function previewDuration(draft: EpisodeDraft): string | null {
@@ -83,7 +86,7 @@ function confirm(title: string, message: string, options: { ok: string; cancel?:
   });
 }
 
-export function EpisodeForm({ initialDraft, initialStep = 0, submitLabel, onSave, onSaved, onOpenExisting }: EpisodeFormProps) {
+export function EpisodeForm({ initialDraft, initialStep = 0, submitLabel, onSave, onSaved, onOpenExisting, offerMedication }: EpisodeFormProps) {
   const { colors } = useAppTheme();
   const navigation = useNavigation();
   const [draft, setDraft] = useState(initialDraft);
@@ -91,6 +94,7 @@ export function EpisodeForm({ initialDraft, initialStep = 0, submitLabel, onSave
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [addMedication, setAddMedication] = useState(false);
   const dirty = useRef(false);
   const saved = useRef(false);
 
@@ -143,7 +147,7 @@ export function EpisodeForm({ initialDraft, initialStep = 0, submitLabel, onSave
     try {
       const id = await onSave({ input, allowOverlap });
       saved.current = true;
-      onSaved(id);
+      onSaved(id, { addMedication });
     } catch (error) {
       if (error instanceof ValidationError) showErrors(error.fields);
       else if (error instanceof DuplicateError) {
@@ -266,7 +270,21 @@ export function EpisodeForm({ initialDraft, initialStep = 0, submitLabel, onSave
       ) : null}
 
       {step === 4 ? (
-        <TextField label="Notas" help="Cualquier detalle que quieras recordar en la consulta." value={draft.notes} onChangeText={(v) => set('notes', v)} error={errors.notes} multiline />
+        <>
+          {offerMedication ? (
+            <SwitchRow
+              label="Tomé medicación para este episodio"
+              description="Al guardar el episodio se abrirá el registro de la toma, ya vinculada."
+              value={addMedication}
+              onChange={setAddMedication}
+            />
+          ) : (
+            <AppText variant="caption" muted>
+              Las tomas de medicación de este episodio se registran desde su detalle.
+            </AppText>
+          )}
+          <TextField label="Notas" help="Cualquier detalle que quieras recordar en la consulta." value={draft.notes} onChangeText={(v) => set('notes', v)} error={errors.notes} multiline />
+        </>
       ) : null}
     </Screen>
   );

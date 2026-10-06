@@ -19,11 +19,13 @@ import {
 } from '../../../domain/catalogs';
 import { ValidationError } from '../../../domain/errors';
 import type { EpisodeEventRecord, EpisodeRecord } from '../../../data/repositories/episodeRepository';
+import type { MedicationRecord } from '../../../data/repositories/habitRepositories';
 import { getRepositories } from '../../../state/services';
 import { useSession } from '../../../state/sessionStore';
 import { AppText, Banner, Button, Card, Disclaimer, Screen, TextField } from '../../../ui/components';
 import { confirmDestructive } from '../../../ui/confirm';
 import { PainScale, painColor } from '../../../ui/features/episode/PainScale';
+import { medicationSummary, responseSummary } from '../../../ui/features/medication/format';
 import { spacing } from '../../../ui/theme';
 import { useAppTheme } from '../../../ui/theme/ThemeContext';
 import { clock } from '../../../utils/clock';
@@ -39,9 +41,10 @@ interface TimelineItem {
   detail?: string;
   intensity?: number;
   eventId?: string;
+  medicationId?: string;
 }
 
-function buildTimeline(episode: EpisodeRecord, events: EpisodeEventRecord[]): TimelineItem[] {
+function buildTimeline(episode: EpisodeRecord, events: EpisodeEventRecord[], medications: MedicationRecord[]): TimelineItem[] {
   const items: TimelineItem[] = [
     { key: 'start', at: episode.startedAt, title: 'Inicio', intensity: episode.intensity },
     ...events.map((e) => ({
@@ -51,6 +54,13 @@ function buildTimeline(episode: EpisodeRecord, events: EpisodeEventRecord[]): Ti
       title: e.kind === 'pain' ? 'Cambio de intensidad' : e.kind === 'medication' ? 'Medicación' : 'Nota',
       intensity: e.intensity,
       detail: e.note,
+    })),
+    ...medications.map((m) => ({
+      key: m.id,
+      medicationId: m.id,
+      at: m.takenAt,
+      title: 'Medicación',
+      detail: `${medicationSummary(m)} · ${responseSummary(m)}`,
     })),
   ];
   if (episode.endedAt) items.push({ key: 'end', at: episode.endedAt, title: 'Fin' });
@@ -73,6 +83,7 @@ export default function EpisodeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [episode, setEpisode] = useState<EpisodeRecord | null | undefined>(undefined);
   const [events, setEvents] = useState<EpisodeEventRecord[]>([]);
+  const [medications, setMedications] = useState<MedicationRecord[]>([]);
   const [update, setUpdate] = useState<number | undefined>();
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +95,7 @@ export default function EpisodeDetailScreen() {
     const record = await repos.episodes.get(user.id, id);
     setEpisode(record);
     setEvents(record ? await repos.episodes.listEvents(user.id, id) : []);
+    setMedications(record ? await repos.medications.listForEpisode(user.id, id) : []);
   }, [user, id]);
 
   useFocusEffect(
@@ -151,7 +163,7 @@ export default function EpisodeDetailScreen() {
   const removeEpisode = async () => {
     const ok = await confirmDestructive({
       title: '¿Eliminar este episodio?',
-      message: 'Se borrará el episodio con sus síntomas, desencadenantes y anotaciones. No se puede deshacer.',
+      message: 'Se borrará el episodio con sus síntomas, desencadenantes y anotaciones. Las tomas de medicación se conservan, sin vincular. No se puede deshacer.',
       confirmLabel: 'Eliminar episodio',
     });
     if (!ok) return;
@@ -215,7 +227,7 @@ export default function EpisodeDetailScreen() {
 
       <View style={styles.section}>
         <AppText variant="heading">Línea temporal</AppText>
-        {buildTimeline(episode, events).map((item) => (
+        {buildTimeline(episode, events, medications).map((item) => (
           <View key={item.key} style={styles.timelineRow}>
             <AppText variant="label" style={styles.time}>
               {hour(item.at)}
@@ -232,6 +244,13 @@ export default function EpisodeDetailScreen() {
               {item.eventId ? (
                 <Button label="Eliminar anotación" variant="ghost" onPress={() => removeEvent(item.eventId!)} />
               ) : null}
+              {item.medicationId ? (
+                <Button
+                  label="Ver o completar la toma"
+                  variant="ghost"
+                  onPress={() => router.push({ pathname: '/registro/medicacion/[id]', params: { id: item.medicationId! } })}
+                />
+              ) : null}
             </View>
           </View>
         ))}
@@ -246,6 +265,13 @@ export default function EpisodeDetailScreen() {
           <Button label="El episodio terminó ahora" variant="secondary" onPress={closeNow} disabled={busy} testID="close-episode" />
         </Card>
       ) : null}
+
+      <Button
+        label="Registrar medicación de este episodio"
+        variant="secondary"
+        onPress={() => router.push({ pathname: '/registro/medicacion/nueva', params: { episodio: id } })}
+        testID="episode-add-medication"
+      />
 
       <Button label="Eliminar episodio" variant="danger" onPress={removeEpisode} disabled={busy} />
       <Disclaimer />

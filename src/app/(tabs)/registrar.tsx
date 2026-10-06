@@ -1,15 +1,6 @@
-/** Menú de registro. Episodio y síntomas ya funcionan; el resto llega en los próximos hitos. */
+/** Menú de registro: episodio, síntomas, medicación y hábitos del día. */
 import { router } from 'expo-router';
-import { View } from 'react-native';
-import { AppText, Card, ComingSoon, ListRow, Screen } from '../../ui/components';
-
-const UPCOMING = [
-  ['Sueño', 'Horas, calidad, despertares e insomnio.'],
-  ['Hidratación', 'Cantidad de agua, vasos y progreso del día.'],
-  ['Medicación', 'Nombre, dosis, hora, motivo y respuesta.'],
-  ['Alimentación', 'Comidas, horarios y ayuno.'],
-  ['Estado diario', 'Estrés, ansiedad, ánimo y carga laboral.'],
-] as const;
+import { AppText, Card, ListRow, Screen } from '../../ui/components';
 
 export default function RegisterScreen() {
   return (
@@ -26,12 +17,23 @@ export default function RegisterScreen() {
           subtitle="Empieza el registro directamente en síntomas y aura."
           onPress={() => router.push({ pathname: '/episodio/nuevo', params: { paso: '2' } })}
         />
+        <ListRow
+          title="Medicación"
+          subtitle="Nombre, dosis, hora, motivo y respuesta. También ves tus últimas tomas."
+          onPress={() => router.push('/registro/medicacion')}
+        />
       </Card>
-      <View style={{ gap: 12 }}>
-        {UPCOMING.map(([title, description]) => (
-          <ComingSoon key={title} title={title} description={description} />
-        ))}
-      </View>
+      <AppText variant="heading">Tu día</AppText>
+      <Card>
+        <ListRow title="Sueño" subtitle="Horas, calidad, despertares e insomnio." onPress={() => router.push('/registro/sueno')} />
+        <ListRow title="Hidratación" subtitle="Vasos de agua, cantidad y progreso del día." onPress={() => router.push('/registro/hidratacion')} />
+        <ListRow title="Alimentación" subtitle="Comidas, horarios y ayuno." onPress={() => router.push('/registro/alimentacion')} />
+        <ListRow
+          title="Estado del día"
+          subtitle="Estrés, ansiedad, ánimo, carga laboral y día sin dolor."
+          onPress={() => router.push('/registro/estado')}
+        />
+      </Card>
     </Screen>
   );
 }

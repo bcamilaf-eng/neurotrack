@@ -50,3 +50,15 @@ export const TERMS_SUMMARY = [
 
 export const LOCAL_MODE_NOTICE =
   'Modo local de prueba: la cuenta solo existe en este teléfono y no se puede recuperar la contraseña por email.';
+
+/** Aviso fijo del módulo de medicación. */
+export const MEDICATION_NOTICE =
+  'NeuroTrack solo registra lo que tomaste y cómo te sentiste. No recomienda iniciar, suspender ni cambiar ningún medicamento: consulta siempre con tu profesional de salud.';
+
+/** Aviso de las escalas de estrés, ansiedad, ánimo y carga. */
+export const SUBJECTIVE_NOTICE =
+  'Estas escalas son tu propia valoración del día. Sirven para ver tu evolución, no son una medición clínica.';
+
+/** Aviso de alimentación: un alimento anotado no es una causa. */
+export const FOOD_NOTICE =
+  'Anotar lo que comes ayuda a buscar posibles asociaciones en tus registros. Que un alimento coincida con un episodio no significa que lo cause.';

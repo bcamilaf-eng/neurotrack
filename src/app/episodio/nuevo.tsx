@@ -23,7 +23,11 @@ export default function NewEpisodeScreen() {
         const record = await repos.episodes.create(user!.id, input, { allowOverlap });
         return record.id;
       }}
-      onSaved={(id) => router.replace({ pathname: '/episodio/[id]', params: { id } })}
+      offerMedication
+      onSaved={(id, { addMedication }) => {
+        router.replace({ pathname: '/episodio/[id]', params: { id } });
+        if (addMedication) router.push({ pathname: '/registro/medicacion/nueva', params: { episodio: id } });
+      }}
       onOpenExisting={(id) => router.replace({ pathname: '/episodio/[id]', params: { id } })}
     />
   );
