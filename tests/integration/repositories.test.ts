@@ -97,6 +97,12 @@ describe('episodios', () => {
     await expect(repos.episodes.remove(USER_ID, saved.id)).rejects.toBeInstanceOf(NotFoundError);
   });
 
+  it('un episodio en curso choca con otro que empieza después', async () => {
+    await repos.episodes.create(USER_ID, episodeInput({ startedAt: '2026-10-06T09:00:00.000Z', endedAt: undefined, ongoing: true }));
+    const later = episodeInput({ startedAt: '2026-10-06T11:00:00.000Z', endedAt: undefined, ongoing: true });
+    await expect(repos.episodes.create(USER_ID, later)).rejects.toBeInstanceOf(DuplicateError);
+  });
+
   it('avisa de un episodio duplicado (solapado) y permite guardarlo si el usuario lo confirma', async () => {
     const first = await repos.episodes.create(USER_ID, episodeInput());
     const overlapping = episodeInput({ startedAt: '2026-10-05T20:00:00.000Z', endedAt: '2026-10-05T22:00:00.000Z' });

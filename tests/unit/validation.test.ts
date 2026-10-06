@@ -106,7 +106,9 @@ describe('episodio', () => {
     const a = { startedAt: '2026-10-05T10:00:00Z', endedAt: '2026-10-05T12:00:00Z' };
     expect(intervalsOverlap(a, { startedAt: '2026-10-05T11:00:00Z', endedAt: '2026-10-05T13:00:00Z' })).toBe(true);
     expect(intervalsOverlap(a, { startedAt: '2026-10-05T12:00:00Z', endedAt: '2026-10-05T13:00:00Z' })).toBe(false);
-    expect(intervalsOverlap(a, { startedAt: '2026-10-05T09:00:00Z', endedAt: null }, NOW)).toBe(true);
+    expect(intervalsOverlap(a, { startedAt: '2026-10-05T09:00:00Z', endedAt: null })).toBe(true);
+    // Un episodio en curso sigue abierto: choca con uno nuevo que empieza después.
+    expect(intervalsOverlap({ startedAt: '2026-10-05T09:00:00Z' }, { startedAt: '2026-10-06T12:00:00Z' })).toBe(true);
   });
 });
 

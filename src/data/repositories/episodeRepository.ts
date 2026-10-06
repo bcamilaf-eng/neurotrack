@@ -34,6 +34,8 @@ export interface SaveOptions {
   allowOverlap?: boolean;
 }
 
+const OPEN_END = '9999-12-31T23:59:59.999Z';
+
 const EPISODE_COLUMNS: ColumnMap<EpisodeData> = {
   startedAt: { column: 'started_at', kind: 'text' },
   endedAt: { column: 'ended_at', kind: 'text' },
@@ -299,14 +301,15 @@ export class EpisodeRepository {
   }
 
   private async assertNoOverlap(userId: string, data: EpisodeData, exceptId?: string) {
-    const end = data.endedAt ?? clock.now().toISOString();
+    // Los episodios en curso siguen abiertos: su fin es «nunca» hasta que se cierran.
+    const end = data.endedAt ?? OPEN_END;
     const clash = await this.db.first<{ id: string }>(
       `SELECT id FROM headache_episodes
        WHERE user_id = ? AND deleted_at IS NULL AND id != ?
          AND started_at < ?
          AND COALESCE(ended_at, ?) > ?
        LIMIT 1`,
-      [userId, exceptId ?? '', end, clock.now().toISOString(), data.startedAt],
+      [userId, exceptId ?? '', end, OPEN_END, data.startedAt],
     );
     if (clash) {
       throw new DuplicateError(

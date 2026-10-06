@@ -42,7 +42,8 @@
         {
           "faceIDPermission": "NeuroTrack usa Face ID para proteger tu registro de salud."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ]
   }
 }
