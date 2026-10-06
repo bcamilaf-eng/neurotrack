@@ -39,6 +39,8 @@ export interface SessionState {
   setBiometricLock(enabled: boolean): Promise<void>;
   /** Guarda los recordatorios y los reprograma. Devuelve cuántos quedaron activos. */
   saveReminders(reminders: ReminderSettings): Promise<number>;
+  /** Apariencia y bloqueo: tema, tamaño de texto y minutos antes de pedir desbloqueo. */
+  updatePreferences(patch: Partial<Pick<UserSettings, 'theme' | 'textScale' | 'lockAfterMinutes'>>): Promise<void>;
   onBackground(): void;
   onForeground(): void;
   deleteAccount(): Promise<void>;
@@ -155,6 +157,13 @@ export const useSession = create<SessionState>((set, get) => {
       const settings = await repos.account.updateSettings(user.id, { reminders });
       set({ settings });
       return applyReminders(reminders);
+    },
+
+    async updatePreferences(patch) {
+      const user = get().user;
+      if (!user) return;
+      const repos = await getRepositories();
+      set({ settings: await repos.account.updateSettings(user.id, patch) });
     },
 
     onBackground() {

@@ -1,7 +1,7 @@
 /**
  * Raíz de la app: configura servicios, tema y protección de rutas según el estado de sesión.
  */
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
@@ -9,7 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { destroyLocalDatabase, openDatabase } from '../data/db/expoDatabase';
 import { createAuthService } from '../services/auth';
 import { cleanupExports } from '../services/export/fileExport';
-import { configureNotifications } from '../services/notifications/reminders';
+import { configureNotifications, onReminderOpened } from '../services/notifications/reminders';
 import { biometrics } from '../services/security/biometrics';
 import { configureServices } from '../state/services';
 import { useSession } from '../state/sessionStore';
@@ -28,9 +28,10 @@ cleanupExports();
 
 export default function RootLayout() {
   const theme = useSession((s) => s.settings?.theme);
+  const textScale = useSession((s) => s.settings?.textScale);
   return (
     <SafeAreaProvider>
-      <ThemeProvider preference={theme}>
+      <ThemeProvider preference={theme} textScale={textScale}>
         <AppNavigator />
       </ThemeProvider>
     </SafeAreaProvider>
@@ -44,6 +45,15 @@ function AppNavigator() {
   useEffect(() => {
     initialize().catch(() => undefined);
   }, [initialize]);
+
+  // Tocar un recordatorio abre «Registrar» si la app ya está desbloqueada.
+  useEffect(
+    () =>
+      onReminderOpened(() => {
+        if (useSession.getState().status === 'ready') router.navigate('/registrar');
+      }),
+    [],
+  );
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {

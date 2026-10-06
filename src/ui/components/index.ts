@@ -7,7 +7,6 @@ export { Disclaimer } from './Disclaimer';
 export { ListRow } from './ListRow';
 export { Screen } from './Screen';
 export { TextField } from './TextField';
-export { ComingSoon } from './ComingSoon';
 export { OptionGroup } from './OptionGroup';
 export { SwitchRow } from './SwitchRow';
 export { ChipGroup } from './ChipGroup';

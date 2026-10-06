@@ -18,7 +18,7 @@ import { createTestDatabase } from '../fixtures/testDatabase';
 const mockParams: Record<string, string> = {};
 
 jest.mock('expo-router', () => {
-  const { useEffect } = require('react');
+  const { useEffect } = jest.requireActual('react');
   return {
     router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() },
     useLocalSearchParams: () => mockParams,

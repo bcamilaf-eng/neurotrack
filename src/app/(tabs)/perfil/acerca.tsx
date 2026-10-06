@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
+import { router } from 'expo-router';
 import { APP_NAME, MEDICAL_DISCLAIMER, PRIVACY_SUMMARY, TAGLINE, TERMS_SUMMARY } from '../../../i18n/es';
-import { AppText, Card, Screen } from '../../../ui/components';
+import { AppText, Button, Card, Screen } from '../../../ui/components';
 import { BrandMark } from '../../../ui/features/auth/AuthHeader';
 
 export default function AboutScreen() {
@@ -26,6 +27,7 @@ export default function AboutScreen() {
             • {line}
           </AppText>
         ))}
+        <Button label="Leer los términos completos" variant="ghost" onPress={() => router.push('/perfil/terminos')} />
       </Card>
       <Card>
         <AppText variant="label">Política de privacidad</AppText>
@@ -34,6 +36,7 @@ export default function AboutScreen() {
             • {line}
           </AppText>
         ))}
+        <Button label="Leer la política completa" variant="ghost" onPress={() => router.push('/perfil/politica')} />
       </Card>
     </Screen>
   );

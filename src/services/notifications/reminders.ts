@@ -81,3 +81,11 @@ export async function applyReminders(settings: ReminderSettings): Promise<number
   }
   return count;
 }
+
+/** Avisa cuando el usuario toca un recordatorio. Devuelve la función para dejar de escuchar. */
+export function onReminderOpened(callback: () => void): () => void {
+  const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+    if (response.notification.request.identifier.startsWith(ID_PREFIX)) callback();
+  });
+  return () => subscription.remove();
+}

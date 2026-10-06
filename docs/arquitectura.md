@@ -13,7 +13,7 @@ Las dependencias van en un solo sentido: `app/ui → state → domain ← data`,
 | Estado | `src/state` | Sesión (Zustand) y acceso a servicios y repositorios. |
 | Dominio | `src/domain` | TypeScript puro: catálogos, esquemas Zod, reglas. Sin React ni SQLite. |
 | Datos | `src/data` | SQL, migraciones, repositorios. Valida con el dominio antes de escribir. |
-| Servicios | `src/services` | Autenticación, biometría y, en próximos hitos, notificaciones e informes. |
+| Servicios | `src/services` | Autenticación, biometría, exportación de archivos (PDF, CSV, JSON) y recordatorios. |
 
 ## Decisiones
 
@@ -45,3 +45,30 @@ Las rutas se protegen con `Stack.Protected` en `src/app/_layout.tsx`: cada grupo
 `symptoms`, `aura_details`, `triggers`, `medications`, `sleep_records`, `hydration_records`, `meal_records`,
 `daily_records` y `alarm_flags`. Definición local en `src/data/db/migrations.ts` y en la nube en
 `supabase/migrations/`.
+
+## Módulos por responsabilidad
+
+| Responsabilidad | Dónde |
+| --- | --- |
+| UI y navegación | `src/app` (rutas), `src/ui/components` (reutilizables), `src/ui/features` (por función) |
+| Lógica de negocio | `src/domain/entities` (esquemas), `src/domain/usecases` (borradores de formulario) |
+| Persistencia | `src/data/db` (migraciones), `src/data/repositories` |
+| Autenticación | `src/services/auth` (Supabase o local), `src/state/sessionStore.ts` |
+| Análisis estadístico | `src/domain/analytics` (resúmenes, períodos, calendario, patrones) |
+| Señales de alarma | `src/domain/alerts/rules.ts` (reglas) y `src/data/repositories/alarmRepository.ts` |
+| Generación de informes | `src/domain/report` (contenido, CSV, HTML) y `src/services/export` (PDF y compartir) |
+| Notificaciones | `src/domain/reminders.ts` (ajustes) y `src/services/notifications` (programación) |
+
+## Flujo de un episodio
+
+1. `EpisodeForm` edita un `EpisodeDraft` (textos y horas por separado).
+2. `draftToInput` lo convierte en `EpisodeInput`; los errores vuelven al paso del formulario que corresponde.
+3. `EpisodeRepository` valida con Zod, comprueba solapamientos y escribe episodio, síntomas, aura y desencadenantes en
+   una transacción.
+4. `onChange` dispara `AlarmRepository.evaluate`, que aplica las reglas y sincroniza `alarm_flags`.
+5. El detalle muestra el aviso si hay señales; calendario, evolución e informe leen los mismos repositorios.
+
+## Archivos que salen del teléfono
+
+Solo cuando el usuario elige un destino en la hoja de compartir: informe PDF, CSV y copia completa JSON. Se crean en
+`cache/exportaciones`, se borran al cerrar la hoja y la carpeta se vacía también al arrancar la app.
