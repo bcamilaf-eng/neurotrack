@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "NeuroTrack",
+    "slug": "neurotrack",
+    "scheme": "neurotrack",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.neurotrack.mobile",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "NeuroTrack usa Face ID para proteger tu registro de salud."
+      }
+    },
+    "android": {
+      "package": "app.neurotrack.mobile",
+      "allowBackup": false,
+      "adaptiveIcon": {
+        "backgroundColor": "#E8EEFB",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "NeuroTrack usa Face ID para proteger tu registro de salud."
+        }
+      ]
+    ]
+  }
+}

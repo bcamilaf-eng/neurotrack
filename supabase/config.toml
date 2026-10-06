@@ -1,0 +1,23 @@
+# Configuración mínima del proyecto Supabase de NEUROTRACK.
+# Valores de seguridad de Auth aplicados también en el panel del proyecto.
+project_id = "neurotrack"
+
+[auth]
+site_url = "neurotrack://"
+additional_redirect_urls = ["neurotrack://reset-password", "exp://**"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+minimum_password_length = 10
+password_requirements = "letters_digits"
+
+[auth.email]
+enable_confirmations = true
+secure_password_change = true
+max_frequency = "60s"
+
+[auth.rate_limit]
+sign_in_sign_ups = 30
+token_verifications = 30
+
+[functions.delete-account]
+verify_jwt = true
