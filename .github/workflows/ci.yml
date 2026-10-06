@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test -- --ci
+
+  supabase-rls:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Aplicar migración
+        run: |
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/00_auth_stub.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006000000_esquema_inicial.sql
+      - name: Comprobar aislamiento por usuario
+        run: |
+          out=$(psql -f supabase/tests/rls_isolation.sql 2>&1)
+          echo "$out"
+          echo "$out" | grep -q 'violates row-level security policy'
+          echo "$out" | grep -q 'El episodio no pertenece al usuario'
+          echo "$out" | grep -A2 'episodios_visibles_para_b' | grep -qE '^\s+0$'
+          echo "$out" | grep -A2 'intensidad_tras_update_de_b' | grep -qE '^\s+8$'
