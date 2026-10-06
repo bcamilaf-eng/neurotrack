@@ -135,6 +135,12 @@ export const DOSE_UNITS = [
 export type DoseUnit = (typeof DOSE_UNITS)[number]['code'];
 export const DOSE_UNIT_CODES = codes<DoseUnit>(DOSE_UNITS);
 
+/** Etiquetas de las escalas subjetivas de 1 a 5, en el orden de sus valores. */
+export const SLEEP_QUALITY_LABELS = ['Muy mala', 'Mala', 'Regular', 'Buena', 'Muy buena'] as const;
+export const HYDRATION_LEVEL_LABELS = ['Muy baja', 'Baja', 'Normal', 'Buena', 'Muy buena'] as const;
+export const MOOD_LABELS = ['Muy bajo', 'Bajo', 'Neutro', 'Bueno', 'Muy bueno'] as const;
+export const WORKLOAD_LABELS = ['Muy baja', 'Baja', 'Moderada', 'Alta', 'Muy alta'] as const;
+
 export const MEAL_TYPES = [
   { code: 'breakfast', label: 'Desayuno' },
   { code: 'lunch', label: 'Almuerzo' },

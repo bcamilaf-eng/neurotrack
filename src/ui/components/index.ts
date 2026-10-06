@@ -13,3 +13,5 @@ export { SwitchRow } from './SwitchRow';
 export { ChipGroup } from './ChipGroup';
 export { DateTimeField } from './DateTimeField';
 export { BarChart } from './BarChart';
+export { ScaleField } from './ScaleField';
+export { ProgressRing } from './ProgressRing';

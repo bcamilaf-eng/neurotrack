@@ -33,11 +33,11 @@ export type StoredRecord<T> = T & RecordMeta & { date: string };
 
 export class RecordRepository<S extends z.ZodType> {
   constructor(
-    private readonly db: SqlDatabase,
-    private readonly config: RecordRepositoryConfig<S>,
+    protected readonly db: SqlDatabase,
+    protected readonly config: RecordRepositoryConfig<S>,
   ) {}
 
-  private hydrate(row: Record<string, unknown>): StoredRecord<z.output<S>> {
+  protected hydrate(row: Record<string, unknown>): StoredRecord<z.output<S>> {
     return {
       ...(rowToObject(row, this.config.columns) as object),
       ...metaFromRow(row),

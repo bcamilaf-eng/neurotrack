@@ -86,6 +86,7 @@ function AppNavigator() {
         <Stack.Protected guard={status === 'ready'}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="episodio" />
+          <Stack.Screen name="registro" />
         </Stack.Protected>
         <Stack.Screen name="reset-password" />
       </Stack>

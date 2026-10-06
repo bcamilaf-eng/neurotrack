@@ -72,7 +72,7 @@ export function hydrationProgress(data: Pick<HydrationData, 'amountMl' | 'goalMl
 export const mealInputSchema = z
   .object({
     date: pastOrTodayDate,
-    mealType: z.enum(MEAL_TYPE_CODES),
+    mealType: z.enum(MEAL_TYPE_CODES, { error: 'Elige el tipo de comida.' }),
     time: hhmm.optional(),
     foods: z
       .array(z.string().trim().min(1).max(60))

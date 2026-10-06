@@ -13,7 +13,6 @@ import {
   Banner,
   Button,
   Card,
-  ComingSoon,
   Disclaimer,
   ListRow,
   Screen,
@@ -138,7 +137,12 @@ export default function HomeScreen() {
           </AppText>
         ) : null}
         {painFreeError ? <Banner tone="danger" message={painFreeError} /> : null}
-        <ComingSoon title="Registrar medicación" description="Llega con el registro de tratamientos." />
+        <Button
+          label="Registrar medicación"
+          variant="secondary"
+          onPress={() => router.push('/registro/medicacion/nueva')}
+          testID="quick-medication"
+        />
       </View>
 
       <Card>

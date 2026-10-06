@@ -13,8 +13,8 @@ tratamiento de un profesional de salud.
 | Hito | Etapas | Estado |
 | --- | --- | --- |
 | 1. Base | Arquitectura, autenticación, base de datos | ✅ Hecho |
-| 2. Registro clínico | Dashboard, episodios, síntomas y desencadenantes | ✅ Esta versión |
-| 3. Tratamiento y hábitos | Medicación, sueño, hidratación, alimentación, estado diario | Pendiente |
+| 2. Registro clínico | Dashboard, episodios, síntomas y desencadenantes | ✅ Hecho |
+| 3. Tratamiento y hábitos | Medicación, sueño, hidratación, alimentación, estado diario | ✅ Esta versión |
 | 4. Visualización y análisis | Calendario, estadísticas, patrones | Pendiente |
 | 5. Seguridad del paciente | Alertas, informes PDF/CSV, notificaciones | Pendiente |
 | 6. Cierre | Privacidad completa, pruebas E2E, optimización UI/UX | Pendiente |
@@ -44,6 +44,24 @@ tratamiento de un profesional de salud.
 - Detalle del episodio con línea temporal: anotar la intensidad actual o una nota, cerrar un episodio en curso, editar y eliminar con confirmación.
 - Inicio con resumen del mes, días desde el último episodio, acciones rápidas, «día sin dolor» y gráficos de las últimas 8 semanas.
 - 101 pruebas automatizadas.
+
+### Qué incluye el hito 3
+
+- Medicación: nombre, dosis y unidad, fecha y hora, motivo, si la indicó un profesional, respuesta (sin alivio, parcial o
+  completo), minutos hasta el alivio y efectos adversos. La respuesta se puede completar más tarde.
+- Aviso fijo: la app registra lo que tomaste y nunca recomienda iniciar, suspender ni cambiar un medicamento.
+- Accesos rápidos a los medicamentos usados antes, con su última dosis, y lista de las últimas tomas por día.
+- Vínculo con episodios: desde el detalle del episodio, desde el último paso del registro («Tomé medicación para este
+  episodio») o eligiendo un episodio de ese día en el formulario. Las tomas aparecen en la línea temporal del episodio.
+- Sueño: hora de acostarse y de levantarse (también si fue antes de medianoche), horas calculadas, calidad 1–5,
+  despertares, insomnio y sueño reparador.
+- Hidratación: botones de vaso de 250 ml, cantidad total, objetivo diario, anillo de progreso y nivel percibido.
+- Alimentación: varias comidas por día, horario, alimentos como etiquetas y ayuno con sus horas, con un aviso de que
+  una coincidencia no es una causa.
+- Estado del día: estrés y ansiedad 1–10, ánimo y carga laboral o académica 1–5, situaciones estresantes y «día sin
+  dolor» (bloqueado si ese día tiene un episodio), aclarando que son valoraciones subjetivas.
+- Cada formulario diario abre el registro del día si ya existe, para editarlo en lugar de duplicarlo.
+- 132 pruebas automatizadas.
 
 Las secciones de los hitos siguientes aparecen en la app marcadas como «Próximamente».
 
