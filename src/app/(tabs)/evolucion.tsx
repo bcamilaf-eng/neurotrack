@@ -17,7 +17,6 @@ import {
   BarChart,
   Button,
   Card,
-  ComingSoon,
   Disclaimer,
   LineChart,
   ListRow,
@@ -203,7 +202,11 @@ export default function EvolutionScreen() {
         </>
       ) : null}
 
-      <ComingSoon title="Generar informe" description="Informe PDF o CSV para llevar a tu consulta." />
+      <Card>
+        <AppText variant="heading">Informe para tu consulta</AppText>
+        <AppText muted>Resumen en PDF o CSV de tus episodios, medicación y observaciones, para compartir con tu profesional de salud.</AppText>
+        <Button label="Generar informe" onPress={() => router.push('/informe')} testID="open-report" />
+      </Card>
       <Disclaimer />
     </Screen>
   );

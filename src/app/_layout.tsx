@@ -8,6 +8,8 @@ import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { destroyLocalDatabase, openDatabase } from '../data/db/expoDatabase';
 import { createAuthService } from '../services/auth';
+import { cleanupExports } from '../services/export/fileExport';
+import { configureNotifications } from '../services/notifications/reminders';
 import { biometrics } from '../services/security/biometrics';
 import { configureServices } from '../state/services';
 import { useSession } from '../state/sessionStore';
@@ -20,6 +22,9 @@ configureServices({
   destroyLocalData: destroyLocalDatabase,
   biometrics,
 });
+configureNotifications();
+// Borra cualquier exportación que hubiera quedado de una sesión anterior.
+cleanupExports();
 
 export default function RootLayout() {
   const theme = useSession((s) => s.settings?.theme);
@@ -87,6 +92,18 @@ function AppNavigator() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="episodio" />
           <Stack.Screen name="registro" />
+          <Stack.Screen
+            name="informe"
+            options={{
+              headerShown: true,
+              title: 'Informe para tu consulta',
+              headerShadowVisible: false,
+              headerBackButtonDisplayMode: 'minimal',
+              headerTintColor: colors.primary,
+              headerTitleStyle: { color: colors.text },
+              headerStyle: { backgroundColor: colors.background },
+            }}
+          />
         </Stack.Protected>
         <Stack.Screen name="reset-password" />
       </Stack>

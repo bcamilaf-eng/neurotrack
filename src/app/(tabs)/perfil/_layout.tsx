@@ -17,6 +17,7 @@ export default function ProfileLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="datos" options={{ title: 'Datos personales' }} />
       <Stack.Screen name="seguridad" options={{ title: 'Seguridad' }} />
+      <Stack.Screen name="recordatorios" options={{ title: 'Recordatorios' }} />
       <Stack.Screen name="privacidad" options={{ title: 'Privacidad' }} />
       <Stack.Screen name="acerca" options={{ title: 'Acerca de' }} />
     </Stack>
