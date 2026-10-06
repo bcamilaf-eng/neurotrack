@@ -15,3 +15,4 @@ export { DateTimeField } from './DateTimeField';
 export { BarChart } from './BarChart';
 export { ScaleField } from './ScaleField';
 export { ProgressRing } from './ProgressRing';
+export { LineChart } from './LineChart';

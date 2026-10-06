@@ -5,6 +5,8 @@ import { HYDRATION_LEVEL_LABELS } from '../../domain/catalogs';
 import { DEFAULT_GLASS_ML, type HydrationData } from '../../domain/entities/habits';
 import { addGlasses, emptyHydrationDraft, type HydrationDraft, hydrationDraftToInput, hydrationToDraft } from '../../domain/usecases/habitDrafts';
 import { AppText, Banner, Button, Card, DateTimeField, ProgressRing, ScaleField, Screen, TextField } from '../../ui/components';
+import { confirmDestructive } from '../../ui/confirm';
+import type { StoredRecord } from '../../data/repositories/recordRepository';
 import { type DayFormConfig, useDayForm } from '../../ui/features/habits/useDayForm';
 import { useDayParam } from '../../ui/hooks/useDayParam';
 import { spacing } from '../../ui/theme';
@@ -12,10 +14,11 @@ import { parseOptionalNumber } from '../../utils/parse';
 
 const valid = (n: number | undefined) => (n === undefined || Number.isNaN(n) ? 0 : n);
 
-const HYDRATION_FORM: DayFormConfig<HydrationDraft, HydrationData> = {
+const HYDRATION_FORM: DayFormConfig<HydrationDraft, StoredRecord<HydrationData>> = {
   empty: emptyHydrationDraft,
   load: (repos, userId, date) => repos.hydration.getByDate(userId, date),
   toDraft: hydrationToDraft,
+  remove: (repos, userId, id) => repos.hydration.remove(userId, id),
   unsavedMessage: 'Tienes cambios sin guardar en la hidratación.',
 };
 
@@ -32,8 +35,25 @@ export default function HydrationScreen() {
     if (ok) router.back();
   };
 
+  const remove = async () => {
+    const ok = await confirmDestructive({
+      title: '¿Eliminar este registro?',
+      message: 'Se borrará la hidratación de ese día.',
+      confirmLabel: 'Eliminar',
+    });
+    if (ok && (await form.remove())) router.back();
+  };
+
   return (
-    <Screen edges={['left', 'right']} footer={<Button label="Guardar hidratación" onPress={save} loading={form.saving} disabled={form.loading} testID="hydration-save" />}>
+    <Screen
+      edges={['left', 'right']}
+      footer={
+        <>
+          <Button label="Guardar hidratación" onPress={save} loading={form.saving} disabled={form.loading} testID="hydration-save" />
+          {form.exists ? <Button label="Eliminar registro" variant="danger" onPress={remove} disabled={form.saving} /> : null}
+        </>
+      }
+    >
       {form.formError ? <Banner tone="danger" message={form.formError} /> : null}
       <DateTimeField label="Día" mode="date" value={draft.date} onChange={(v) => set('date', v)} maximumDate={new Date()} error={errors.date} />
 

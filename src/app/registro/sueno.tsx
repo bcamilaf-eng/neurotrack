@@ -17,6 +17,8 @@ import {
   SwitchRow,
   TextField,
 } from '../../ui/components';
+import { confirmDestructive } from '../../ui/confirm';
+import type { StoredRecord } from '../../data/repositories/recordRepository';
 import { type DayFormConfig, useDayForm } from '../../ui/features/habits/useDayForm';
 import { useDayParam } from '../../ui/hooks/useDayParam';
 
@@ -25,10 +27,11 @@ const RESTORATIVE = [
   { code: 'no', label: 'No' },
 ] as const;
 
-const SLEEP_FORM: DayFormConfig<SleepDraft, SleepData> = {
+const SLEEP_FORM: DayFormConfig<SleepDraft, StoredRecord<SleepData>> = {
   empty: emptySleepDraft,
   load: (repos, userId, date) => repos.sleep.getByDate(userId, date),
   toDraft: sleepToDraft,
+  remove: (repos, userId, id) => repos.sleep.remove(userId, id),
   unsavedMessage: 'Tienes cambios sin guardar en el registro de sueño.',
 };
 
@@ -43,8 +46,25 @@ export default function SleepScreen() {
     if (ok) router.back();
   };
 
+  const remove = async () => {
+    const ok = await confirmDestructive({
+      title: '¿Eliminar este registro?',
+      message: 'Se borrará el registro de sueño de esa noche.',
+      confirmLabel: 'Eliminar',
+    });
+    if (ok && (await form.remove())) router.back();
+  };
+
   return (
-    <Screen edges={['left', 'right']} footer={<Button label="Guardar sueño" onPress={save} loading={form.saving} disabled={form.loading} testID="sleep-save" />}>
+    <Screen
+      edges={['left', 'right']}
+      footer={
+        <>
+          <Button label="Guardar sueño" onPress={save} loading={form.saving} disabled={form.loading} testID="sleep-save" />
+          {form.exists ? <Button label="Eliminar registro" variant="danger" onPress={remove} disabled={form.saving} /> : null}
+        </>
+      }
+    >
       {form.formError ? <Banner tone="danger" message={form.formError} /> : null}
       <DateTimeField label="Día en que te levantaste" mode="date" value={draft.date} onChange={(v) => set('date', v)} maximumDate={new Date()} error={errors.date} />
       {form.exists ? <AppText variant="caption" muted>Ya habías registrado esta noche: estás editando ese registro.</AppText> : null}

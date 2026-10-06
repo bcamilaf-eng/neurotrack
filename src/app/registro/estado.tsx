@@ -6,13 +6,16 @@ import type { DailyRecordData } from '../../domain/entities/habits';
 import { type DailyDraft, dailyDraftToInput, dailyToDraft, emptyDailyDraft } from '../../domain/usecases/habitDrafts';
 import { SUBJECTIVE_NOTICE } from '../../i18n/es';
 import { Banner, Button, DateTimeField, ScaleField, Screen, SwitchRow, TextField } from '../../ui/components';
+import { confirmDestructive } from '../../ui/confirm';
+import type { StoredRecord } from '../../data/repositories/recordRepository';
 import { type DayFormConfig, useDayForm } from '../../ui/features/habits/useDayForm';
 import { useDayParam } from '../../ui/hooks/useDayParam';
 
-const DAILY_FORM: DayFormConfig<DailyDraft, DailyRecordData> = {
+const DAILY_FORM: DayFormConfig<DailyDraft, StoredRecord<DailyRecordData>> = {
   empty: emptyDailyDraft,
   load: (repos, userId, date) => repos.daily.getByDate(userId, date),
   toDraft: dailyToDraft,
+  remove: (repos, userId, id) => repos.daily.remove(userId, id),
   unsavedMessage: 'Tienes cambios sin guardar en el estado del día.',
 };
 
@@ -35,8 +38,25 @@ export default function DailyStateScreen() {
     if (ok) router.back();
   };
 
+  const remove = async () => {
+    const ok = await confirmDestructive({
+      title: '¿Eliminar este registro?',
+      message: 'Se borrará el estado de ese día.',
+      confirmLabel: 'Eliminar',
+    });
+    if (ok && (await form.remove())) router.back();
+  };
+
   return (
-    <Screen edges={['left', 'right']} footer={<Button label="Guardar estado del día" onPress={save} loading={form.saving} disabled={form.loading} testID="daily-save" />}>
+    <Screen
+      edges={['left', 'right']}
+      footer={
+        <>
+          <Button label="Guardar estado del día" onPress={save} loading={form.saving} disabled={form.loading} testID="daily-save" />
+          {form.exists ? <Button label="Eliminar registro" variant="danger" onPress={remove} disabled={form.saving} /> : null}
+        </>
+      }
+    >
       <Banner tone="info" message={SUBJECTIVE_NOTICE} />
       {form.formError ? <Banner tone="danger" message={form.formError} /> : null}
       <DateTimeField label="Día" mode="date" value={draft.date} onChange={(v) => set('date', v)} maximumDate={new Date()} error={errors.date} />

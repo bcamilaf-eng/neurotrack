@@ -13,18 +13,19 @@ import { isIsoDate } from '../../../utils/time';
 import { useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard';
 
 /** Configuración del formulario. Debe ser una constante de módulo (estable entre renders). */
-export interface DayFormConfig<D extends { date: string }, R> {
+export interface DayFormConfig<D extends { date: string }, R extends { id: string }> {
   empty: (date: string) => D;
   load: (repos: Repositories, userId: string, date: string) => Promise<R | null>;
   toDraft: (record: R) => D;
+  remove: (repos: Repositories, userId: string, id: string) => Promise<void>;
   /** Mensaje del aviso al salir con cambios sin guardar. */
   unsavedMessage: string;
 }
 
-export function useDayForm<D extends { date: string }, R>(config: DayFormConfig<D, R>, initialDate: string) {
+export function useDayForm<D extends { date: string }, R extends { id: string }>(config: DayFormConfig<D, R>, initialDate: string) {
   const user = useSession((s) => s.user);
   const [draft, setDraft] = useState<D>(() => config.empty(initialDate));
-  const [exists, setExists] = useState(false);
+  const [existingId, setExistingId] = useState<string | null>(null);
   const [loadedDate, setLoadedDate] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -42,7 +43,7 @@ export function useDayForm<D extends { date: string }, R>(config: DayFormConfig<
       const record = await config.load(repos, user.id, date);
       if (cancelled) return;
       setDraft(record ? config.toDraft(record) : config.empty(date));
-      setExists(!!record);
+      setExistingId(record?.id ?? null);
       setErrors({});
       setLoadedDate(date);
       dirty.current = false;
@@ -89,5 +90,11 @@ export function useDayForm<D extends { date: string }, R>(config: DayFormConfig<
     }
   };
 
-  return { draft, set, update, exists, loading, errors, setErrors, formError, saving, submit };
+  /** Elimina el registro del día que se está editando. */
+  const remove = async () => {
+    if (!user || !existingId) return false;
+    return submit((repos, userId) => config.remove(repos, userId, existingId));
+  };
+
+  return { draft, set, update, exists: existingId !== null, remove, loading, errors, setErrors, formError, saving, submit };
 }

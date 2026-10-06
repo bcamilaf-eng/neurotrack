@@ -14,8 +14,8 @@ tratamiento de un profesional de salud.
 | --- | --- | --- |
 | 1. Base | Arquitectura, autenticación, base de datos | ✅ Hecho |
 | 2. Registro clínico | Dashboard, episodios, síntomas y desencadenantes | ✅ Hecho |
-| 3. Tratamiento y hábitos | Medicación, sueño, hidratación, alimentación, estado diario | ✅ Esta versión |
-| 4. Visualización y análisis | Calendario, estadísticas, patrones | Pendiente |
+| 3. Tratamiento y hábitos | Medicación, sueño, hidratación, alimentación, estado diario | ✅ Hecho |
+| 4. Visualización y análisis | Calendario, estadísticas, patrones | ✅ Esta versión |
 | 5. Seguridad del paciente | Alertas, informes PDF/CSV, notificaciones | Pendiente |
 | 6. Cierre | Privacidad completa, pruebas E2E, optimización UI/UX | Pendiente |
 
@@ -62,6 +62,23 @@ tratamiento de un profesional de salud.
   dolor» (bloqueado si ese día tiene un episodio), aclarando que son valoraciones subjetivas.
 - Cada formulario diario abre el registro del día si ya existe, para editarlo en lugar de duplicarlo.
 - 132 pruebas automatizadas.
+
+### Qué incluye el hito 4
+
+- Calendario neurológico mensual: cada día muestra sin síntomas, cefalea, migraña o episodio intenso (forma, símbolo y
+  color, nunca solo color) y si hubo medicación. Los episodios largos marcan todos los días que duran.
+- Al tocar un día se ven todos sus registros (episodios, tomas, sueño, hidratación, comidas y estado del día), que se
+  abren para editarlos o eliminarlos con confirmación, y se pueden añadir los que faltan.
+- «Mi evolución» con 7 días, 30 días, 3, 6 y 12 meses: episodios, días con dolor y sin dolor registrado, intensidad y
+  duración promedio, tomas de medicación y respuesta por medicamento.
+- Gráficos: episodios por tramo, línea temporal de intensidad, distribución de intensidad y calendario de frecuencia,
+  cada uno con un resumen en texto para lectores de pantalla.
+- «Patrones personales», con permiso explícito: compara la frecuencia de episodios en días con y sin sueño corto,
+  estrés alto, poca hidratación, ayuno o un alimento concreto. Solo con al menos 8 episodios y 14 días con registro del
+  factor, siempre con sus números y la etiqueta «Dato registrado» o «Asociación estadística», y con el pie «Una
+  coincidencia en tus datos no demuestra que un factor cause los episodios». Los umbrales están en
+  `src/domain/analytics/patterns.ts` para que un profesional los revise.
+- 149 pruebas automatizadas.
 
 Las secciones de los hitos siguientes aparecen en la app marcadas como «Próximamente».
 
