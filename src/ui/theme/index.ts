@@ -84,10 +84,18 @@ export const MIN_TOUCH = 48;
 export interface Theme {
   dark: boolean;
   colors: Palette;
+  /** Multiplicador de texto elegido en la app (se suma al del sistema). */
+  textScale: number;
 }
 
-export function useTheme(override?: 'system' | 'light' | 'dark'): Theme {
+export const TEXT_SCALES = [
+  { code: '1', label: 'Normal' },
+  { code: '1.15', label: 'Grande' },
+  { code: '1.3', label: 'Muy grande' },
+] as const;
+
+export function useTheme(override?: 'system' | 'light' | 'dark', textScale = 1): Theme {
   const system = useColorScheme();
   const dark = override === 'dark' || ((!override || override === 'system') && system === 'dark');
-  return { dark, colors: dark ? darkPalette : lightPalette };
+  return { dark, colors: dark ? darkPalette : lightPalette, textScale };
 }

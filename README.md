@@ -16,8 +16,8 @@ tratamiento de un profesional de salud.
 | 2. Registro clínico | Dashboard, episodios, síntomas y desencadenantes | ✅ Hecho |
 | 3. Tratamiento y hábitos | Medicación, sueño, hidratación, alimentación, estado diario | ✅ Hecho |
 | 4. Visualización y análisis | Calendario, estadísticas, patrones | ✅ Hecho |
-| 5. Seguridad del paciente | Alertas, informes PDF/CSV, notificaciones | ✅ Esta versión |
-| 6. Cierre | Privacidad completa, pruebas E2E, optimización UI/UX | Pendiente |
+| 5. Seguridad del paciente | Alertas, informes PDF/CSV, notificaciones | ✅ Hecho |
+| 6. Cierre | Privacidad completa, pruebas E2E, optimización UI/UX | ✅ Esta versión |
 
 ### Qué incluye el hito 1
 
@@ -101,7 +101,19 @@ tratamiento de un profesional de salud.
   al cerrar sesión o borrar la cuenta.
 - 177 pruebas automatizadas.
 
-Las secciones de los hitos siguientes aparecen en la app marcadas como «Próximamente».
+### Qué incluye el hito 6
+
+- Centro de privacidad completo: copia de todos tus datos en JSON, borrado de todos los registros conservando la
+  cuenta, eliminación de la cuenta, consentimientos opcionales revocables, y política de privacidad y términos
+  completos (borrador para revisión legal). Detalle en [docs/privacidad.md](docs/privacidad.md).
+- Apariencia: tema claro, oscuro o del sistema y tres tamaños de texto, que se suman al del teléfono. En Seguridad se
+  elige cuándo volver a pedir el desbloqueo.
+- Tocar un recordatorio abre «Registrar».
+- Recorrido de punta a punta en pruebas (alta, episodio, edición, calendario, informe, exportación, borrado y baja) y
+  mapa de pruebas en [docs/pruebas.md](docs/pruebas.md). 183 pruebas automatizadas.
+- `eas.json` con perfiles de desarrollo, prueba interna y producción, e instrucciones de despliegue y actualizaciones
+  por el aire en [docs/despliegue.md](docs/despliegue.md).
+- [Lista de futuras mejoras](docs/futuras-mejoras.md); la principal es la sincronización con Supabase.
 
 ## Ejecutar el proyecto
 
@@ -145,7 +157,7 @@ src/
 └─ utils/          Fechas, reloj inyectable, identificadores
 supabase/          Migraciones PostgreSQL con RLS, función de borrado de cuenta, pruebas SQL
 tests/             Pruebas unitarias, de integración y de pantallas
-docs/              Arquitectura y despliegue
+docs/              Arquitectura, despliegue, privacidad, pruebas y futuras mejoras
 ```
 
 Más detalle en [docs/arquitectura.md](docs/arquitectura.md).

@@ -75,3 +75,12 @@ export async function shareCsv(csv: string, baseName: string): Promise<void> {
   target.write(csv);
   await share(target, 'text/csv', 'public.comma-separated-values-text', 'Compartir datos CSV');
 }
+
+/** Guarda la copia completa de los datos (JSON), abre la hoja de compartir y la borra al terminar. */
+export async function shareJson(data: unknown, baseName: string): Promise<void> {
+  cleanupExports();
+  const target = new File(exportDirectory(), `${baseName}.json`);
+  target.create({ overwrite: true });
+  target.write(JSON.stringify(data, null, 2));
+  await share(target, 'application/json', 'public.json', 'Compartir copia de tus datos');
+}

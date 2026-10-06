@@ -19,7 +19,7 @@ import {
 import { parseOrThrow } from '../../domain/errors';
 import { clock } from '../../utils/clock';
 import { newId } from '../../utils/id';
-import { CLINICAL_TABLES } from '../db/migrations';
+import { CLINICAL_TABLES, LATEST_SCHEMA_VERSION } from '../db/migrations';
 import type { SqlDatabase } from '../db/types';
 import { type ColumnMap, objectToColumns, rowToObject } from './mapping';
 
@@ -42,6 +42,15 @@ export const DEFAULT_SETTINGS: UserSettings = {
 };
 
 export type Profile = ProfileData & { id: string; email: string };
+
+export interface DataExport {
+  format: 'neurotrack-export';
+  schemaVersion: number;
+  exportedAt: string;
+  profile: Record<string, unknown>;
+  settings: UserSettings;
+  tables: Record<string, Record<string, unknown>[]>;
+}
 
 export interface EmergencyContact {
   id: string;
@@ -225,6 +234,31 @@ export class AccountRepository {
    * Elimina de forma definitiva todos los datos del usuario en este dispositivo.
    * `keepAccount` conserva la fila de usuario y sus ajustes (eliminar datos ≠ eliminar cuenta).
    */
+  /**
+   * Copia completa de los datos del usuario (derecho de acceso y portabilidad): perfil,
+   * ajustes y todas las tablas clínicas sin los registros borrados.
+   */
+  async exportAllData(userId: string): Promise<DataExport> {
+    const tables: Record<string, Record<string, unknown>[]> = {};
+    for (const table of [...CLINICAL_TABLES].reverse()) {
+      const rows = await this.db.all<Record<string, unknown>>(
+        `SELECT * FROM ${table} WHERE user_id = ? AND deleted_at IS NULL ORDER BY created_at`,
+        [userId],
+      );
+      tables[table] = rows.map(({ user_id: _user, sync_status: _sync, deleted_at: _deleted, ...rest }) => rest);
+    }
+    const user = await this.db.first<Record<string, unknown>>(`SELECT * FROM users WHERE id = ?`, [userId]);
+    const { sync_status: _sync, ...profile } = user ?? {};
+    return {
+      format: 'neurotrack-export',
+      schemaVersion: LATEST_SCHEMA_VERSION,
+      exportedAt: clock.now().toISOString(),
+      profile,
+      settings: await this.getSettings(userId),
+      tables,
+    };
+  }
+
   async deleteAllData(userId: string, options: { keepAccount: boolean }): Promise<void> {
     await this.db.transaction(async () => {
       for (const table of CLINICAL_TABLES) {

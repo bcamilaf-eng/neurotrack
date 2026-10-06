@@ -31,7 +31,12 @@ export default function ProfileHome() {
           value={`${activeReminders} activos`}
           onPress={() => router.push('/perfil/recordatorios')}
         />
-        <ListRow title="Privacidad" subtitle="Consentimientos y eliminación de datos" onPress={() => router.push('/perfil/privacidad')} />
+        <ListRow
+          title="Apariencia"
+          subtitle="Tema claro u oscuro y tamaño del texto"
+          onPress={() => router.push('/perfil/apariencia')}
+        />
+        <ListRow title="Privacidad" subtitle="Consentimientos, exportar y eliminar tus datos" onPress={() => router.push('/perfil/privacidad')} />
         <ListRow title="Acerca de" subtitle="Versión, términos y aviso médico" onPress={() => router.push('/perfil/acerca')} />
       </View>
       <Button label="Cerrar sesión" variant="secondary" onPress={() => signOut()} />
