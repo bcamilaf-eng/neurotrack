@@ -12,6 +12,7 @@ import {
   PAIN_LOCATIONS,
   PAIN_QUALITIES,
   SYMPTOMS,
+  type SymptomType,
   TRIGGERS,
 } from '../../../domain/catalogs';
 import { type EpisodeInput, isLongEpisode } from '../../../domain/entities/episode';
@@ -22,6 +23,7 @@ import {
   AppText,
   Banner,
   Button,
+  Checkbox,
   ChipGroup,
   DateTimeField,
   OptionGroup,
@@ -34,12 +36,17 @@ import { useAppTheme } from '../../theme/ThemeContext';
 import { HeadMap } from './HeadMap';
 import { PainScale } from './PainScale';
 
+/** Síntomas que el motor de alertas vigila: se preguntan aparte, como casillas, para no pasarlos por alto. */
+const WATCHED: readonly SymptomType[] = ['one_side_weakness', 'loss_of_consciousness', 'confusion', 'seizure', 'fever', 'neck_stiffness'];
+const WATCHED_SYMPTOMS = SYMPTOMS.filter((s) => WATCHED.includes(s.code));
+const COMMON_SYMPTOMS = SYMPTOMS.filter((s) => !WATCHED.includes(s.code));
+
 export const STEPS = ['Cuándo y cuánto', 'Cómo es el dolor', 'Síntomas', 'Desencadenantes', 'Medicación y notas'] as const;
 
 const FIELD_STEP: Record<string, number> = {
-  date: 0, startTime: 0, endDate: 0, endTime: 0, startedAt: 0, endedAt: 0, intensity: 0, ongoing: 0,
+  date: 0, startTime: 0, endDate: 0, endTime: 0, startedAt: 0, endedAt: 0, intensity: 0, ongoing: 0, suddenOnset: 0,
   type: 1, typeOther: 1, locations: 1, locationOther: 1, qualities: 1, qualityOther: 1,
-  symptoms: 2, aura: 2, 'aura.types': 2, 'aura.durationMin': 2,
+  symptoms: 2, headTrauma: 2, aura: 2, 'aura.types': 2, 'aura.durationMin': 2,
   triggers: 3,
   notes: 4,
 };
@@ -59,7 +66,7 @@ export interface EpisodeFormProps {
   /** Guarda y devuelve el id del episodio. Puede lanzar `DuplicateError`. */
   onSave: (request: SaveRequest) => Promise<string>;
   /** `addMedication`: el usuario quiere registrar ahora la medicación de este episodio. */
-  onSaved: (id: string, options: { addMedication: boolean }) => void;
+  onSaved: (id: string, options: { addMedication: boolean }) => void | Promise<void>;
   onOpenExisting?: (id: string) => void;
   /** Muestra la opción de registrar la medicación al guardar (solo en episodios nuevos). */
   offerMedication?: boolean;
@@ -147,7 +154,7 @@ export function EpisodeForm({ initialDraft, initialStep = 0, submitLabel, onSave
     try {
       const id = await onSave({ input, allowOverlap });
       saved.current = true;
-      onSaved(id, { addMedication });
+      await onSaved(id, { addMedication });
     } catch (error) {
       if (error instanceof ValidationError) showErrors(error.fields);
       else if (error instanceof DuplicateError) {
@@ -223,6 +230,13 @@ export function EpisodeForm({ initialDraft, initialStep = 0, submitLabel, onSave
           ) : null}
           {duration ? <AppText muted>{duration}</AppText> : null}
           <PainScale value={draft.intensity} onChange={(v) => set('intensity', v)} error={errors.intensity} label="Intensidad máxima" />
+          <Checkbox
+            label="¿Llegó al máximo en menos de un minuto?"
+            description="Marca si el dolor alcanzó su intensidad máxima de golpe."
+            checked={draft.suddenOnset}
+            onChange={(v) => set('suddenOnset', v)}
+            testID="episode-sudden-onset"
+          />
         </>
       ) : null}
 
@@ -243,13 +257,31 @@ export function EpisodeForm({ initialDraft, initialStep = 0, submitLabel, onSave
 
       {step === 2 ? (
         <>
-          <ChipGroup label="Síntomas asociados" hint="Marca todos los que notaste." options={SYMPTOMS} selected={draft.symptoms} onToggle={(code) => set('symptoms', toggle(draft.symptoms, code))} error={errors.symptoms} testID="symptoms" />
+          <ChipGroup label="Síntomas asociados" hint="Marca todos los que notaste." options={COMMON_SYMPTOMS} selected={draft.symptoms} onToggle={(code) => set('symptoms', toggle(draft.symptoms, code))} error={errors.symptoms} testID="symptoms" />
           {draft.symptoms.includes('aura') ? (
             <>
               <ChipGroup label="Tipo de aura" options={AURA_TYPES} selected={draft.auraTypes} onToggle={(code) => set('auraTypes', toggle(draft.auraTypes, code))} error={errors.aura} />
               <TextField label="Duración del aura (minutos)" value={draft.auraDuration} onChangeText={(v) => set('auraDuration', v.replace(/[^0-9]/g, ''))} keyboardType="number-pad" error={errors.auraDuration} />
             </>
           ) : null}
+          <View style={styles.watched}>
+            <AppText variant="label">¿Notaste alguno de estos?</AppText>
+            {WATCHED_SYMPTOMS.map((s) => (
+              <Checkbox
+                key={s.code}
+                label={s.label}
+                checked={draft.symptoms.includes(s.code)}
+                onChange={() => set('symptoms', toggle(draft.symptoms, s.code))}
+                testID={`symptom-${s.code}`}
+              />
+            ))}
+            <Checkbox
+              label="¿Golpe fuerte en la cabeza en los últimos días?"
+              checked={draft.headTrauma}
+              onChange={(v) => set('headTrauma', v)}
+              testID="episode-head-trauma"
+            />
+          </View>
         </>
       ) : null}
 
@@ -295,4 +327,5 @@ const styles = StyleSheet.create({
   navButton: { flex: 1 },
   progress: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.sm },
   segment: { flex: 1, height: 4, borderRadius: 2 },
+  watched: { gap: spacing.xs },
 });

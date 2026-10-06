@@ -54,6 +54,10 @@ export const episodeInputSchema = z
     symptoms: z.array(symptomInputSchema).default([]),
     aura: auraInputSchema.optional(),
     triggers: z.array(triggerInputSchema).default([]),
+    /** «¿Llegó al máximo en menos de un minuto?» (señal de alarma si además es muy intenso). */
+    suddenOnset: z.boolean().optional(),
+    /** «¿Golpe fuerte en la cabeza en los últimos días?» */
+    headTrauma: z.boolean().optional(),
     notes: optionalText(2000),
   })
   .superRefine((value, ctx) => {

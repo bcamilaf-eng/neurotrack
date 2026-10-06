@@ -1,10 +1,13 @@
 import { router } from 'expo-router';
 import { View } from 'react-native';
+import { parseReminders, REMINDER_TYPES } from '../../../domain/reminders';
 import { useSession } from '../../../state/sessionStore';
 import { AppText, Button, Card, ListRow, Screen } from '../../../ui/components';
 
 export default function ProfileHome() {
   const { user, mode, signOut, settings } = useSession();
+  const reminders = parseReminders(settings?.reminders);
+  const activeReminders = REMINDER_TYPES.filter((r) => reminders[r.code].enabled).length;
   return (
     <Screen>
       <AppText variant="title">Perfil</AppText>
@@ -21,6 +24,12 @@ export default function ProfileHome() {
           subtitle="Bloqueo con Face ID, huella o código"
           value={settings?.biometricLock ? 'Activado' : 'Desactivado'}
           onPress={() => router.push('/perfil/seguridad')}
+        />
+        <ListRow
+          title="Recordatorios"
+          subtitle="Síntomas, medicación, registro diario, hidratación y seguimiento"
+          value={`${activeReminders} activos`}
+          onPress={() => router.push('/perfil/recordatorios')}
         />
         <ListRow title="Privacidad" subtitle="Consentimientos y eliminación de datos" onPress={() => router.push('/perfil/privacidad')} />
         <ListRow title="Acerca de" subtitle="Versión, términos y aviso médico" onPress={() => router.push('/perfil/acerca')} />

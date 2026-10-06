@@ -15,8 +15,8 @@ tratamiento de un profesional de salud.
 | 1. Base | Arquitectura, autenticación, base de datos | ✅ Hecho |
 | 2. Registro clínico | Dashboard, episodios, síntomas y desencadenantes | ✅ Hecho |
 | 3. Tratamiento y hábitos | Medicación, sueño, hidratación, alimentación, estado diario | ✅ Hecho |
-| 4. Visualización y análisis | Calendario, estadísticas, patrones | ✅ Esta versión |
-| 5. Seguridad del paciente | Alertas, informes PDF/CSV, notificaciones | Pendiente |
+| 4. Visualización y análisis | Calendario, estadísticas, patrones | ✅ Hecho |
+| 5. Seguridad del paciente | Alertas, informes PDF/CSV, notificaciones | ✅ Esta versión |
 | 6. Cierre | Privacidad completa, pruebas E2E, optimización UI/UX | Pendiente |
 
 ### Qué incluye el hito 1
@@ -80,6 +80,27 @@ tratamiento de un profesional de salud.
   `src/domain/analytics/patterns.ts` para que un profesional los revise.
 - 149 pruebas automatizadas.
 
+### Qué incluye el hito 5
+
+- Señales de alarma: al guardar, editar o actualizar un episodio se evalúan las reglas de
+  `src/domain/alerts/rules.ts` (archivo único y versionado, pensado para que lo revise un neurólogo). Si hay alguna,
+  el detalle muestra exactamente «Este registro contiene una señal que puede requerir evaluación médica urgente.
+  Considera buscar atención médica inmediata.», lo registrado que la activó y botones para llamar a emergencias o al
+  contacto de emergencia. Cada señal queda en `alarm_flags` con la versión de las reglas y cuándo se mostró y se
+  reconoció.
+- El episodio pregunta «¿Llegó al máximo en menos de un minuto?» y «¿Golpe fuerte en la cabeza en los últimos días?», y
+  muestra como casillas aparte debilidad de un lado, pérdida de conciencia, confusión, convulsiones, fiebre y rigidez de
+  cuello (migración 2).
+- Informe para la consulta (desde «Mi evolución»): últimos 7 días, 30 días, 3 meses o fechas a elegir; resumen, tabla
+  Fecha | Hora | Duración | Intensidad | Síntomas | Posibles factores | Tratamiento | Respuesta, gráficos, medicación y
+  observaciones etiquetadas («Dato registrado», «Asociación estadística»). Exporta PDF o CSV (separador «;», listo para
+  Excel en español) con la hoja de compartir del sistema; el archivo se crea en la caché privada y se borra al cerrarla.
+  Las asociaciones solo se incluyen si el usuario aceptó «Patrones personales».
+- Recordatorios (Perfil › Recordatorios): registrar síntomas, medicación, registro diario, hidratación y seguimiento
+  semanal, cada uno con su interruptor y su hora. La notificación solo dice «Tienes un registro pendiente». Se cancelan
+  al cerrar sesión o borrar la cuenta.
+- 177 pruebas automatizadas.
+
 Las secciones de los hitos siguientes aparecen en la app marcadas como «Próximamente».
 
 ## Ejecutar el proyecto
@@ -118,7 +139,7 @@ src/
 ├─ ui/             Tema, componentes reutilizables, hooks de formulario
 ├─ domain/         Catálogos clínicos, esquemas de validación (Zod), errores
 ├─ data/           Base SQLite cifrada, migraciones y repositorios
-├─ services/       Autenticación (Supabase / local) y biometría
+├─ services/       Autenticación (Supabase / local), biometría, exportación y recordatorios
 ├─ state/          Estado de sesión (Zustand) y contenedor de servicios
 ├─ i18n/           Textos en español, avisos médicos y legales
 └─ utils/          Fechas, reloj inyectable, identificadores

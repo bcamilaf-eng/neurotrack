@@ -14,6 +14,8 @@ import { signInSchema, signUpSchema } from '../domain/entities/user';
 import { parseOrThrow } from '../domain/errors';
 import type { UserSettings } from '../data/repositories/accountRepository';
 import { AuthError, type AuthMode, type AuthSession, type AuthUser } from '../services/auth/types';
+import type { ReminderSettings } from '../domain/reminders';
+import { applyReminders, cancelReminders } from '../services/notifications/reminders';
 import { clock } from '../utils/clock';
 import { getRepositories, getServices } from './services';
 
@@ -35,6 +37,8 @@ export interface SessionState {
   acceptConsents(decisions: Partial<Record<ConsentType, boolean>>): Promise<void>;
   unlock(): Promise<boolean>;
   setBiometricLock(enabled: boolean): Promise<void>;
+  /** Guarda los recordatorios y los reprograma. Devuelve cuántos quedaron activos. */
+  saveReminders(reminders: ReminderSettings): Promise<number>;
   onBackground(): void;
   onForeground(): void;
   deleteAccount(): Promise<void>;
@@ -102,6 +106,8 @@ export const useSession = create<SessionState>((set, get) => {
 
     async signOut() {
       await getServices().auth.signOut();
+      // Los recordatorios son de esta cuenta: no deben seguir sonando sin sesión.
+      await cancelReminders().catch(() => undefined);
       set({ status: 'signedOut', user: null, settings: null });
     },
 
@@ -142,6 +148,15 @@ export const useSession = create<SessionState>((set, get) => {
       set({ settings });
     },
 
+    async saveReminders(reminders) {
+      const user = get().user;
+      if (!user) return 0;
+      const repos = await getRepositories();
+      const settings = await repos.account.updateSettings(user.id, { reminders });
+      set({ settings });
+      return applyReminders(reminders);
+    },
+
     onBackground() {
       if (get().status === 'ready') set({ backgroundedAt: clock.now().getTime() });
     },
@@ -161,6 +176,7 @@ export const useSession = create<SessionState>((set, get) => {
       await services.auth.deleteAccount();
       const repos = await getRepositories();
       await repos.account.deleteAllData(user.id, { keepAccount: false });
+      await cancelReminders().catch(() => undefined);
       set({ status: 'signedOut', user: null, settings: null });
     },
   };
