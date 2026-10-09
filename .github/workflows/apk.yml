@@ -1,0 +1,50 @@
+name: APK Android
+
+on:
+  push:
+    branches: [claude/project-thread-ttjvc5]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - run: npx expo prebuild --platform android --no-install
+        env:
+          CI: 1
+      - name: Compilar APK
+        working-directory: android
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a,x86_64 --no-daemon
+        env:
+          NODE_ENV: production
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neurotrack-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+      - name: Publicar el APK en la rama apk (en partes de 60 MB por el límite de GitHub)
+        run: |
+          mkdir /tmp/out && cp android/app/build/outputs/apk/release/app-release.apk /tmp/out/neurotrack.apk
+          cd /tmp/out
+          git init -q -b apk
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          sha256sum neurotrack.apk > neurotrack.apk.sha256
+          split -b 60M neurotrack.apk neurotrack.apk.part-
+          rm neurotrack.apk
+          git add .
+          git commit -qm "APK de NeuroTrack (${GITHUB_SHA::7})"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" apk
