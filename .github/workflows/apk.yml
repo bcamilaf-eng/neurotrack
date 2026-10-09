@@ -35,13 +35,16 @@ jobs:
         with:
           name: neurotrack-apk
           path: android/app/build/outputs/apk/release/app-release.apk
-      - name: Publicar el APK en la rama apk
+      - name: Publicar el APK en la rama apk (en partes de 60 MB por el límite de GitHub)
         run: |
           mkdir /tmp/out && cp android/app/build/outputs/apk/release/app-release.apk /tmp/out/neurotrack.apk
           cd /tmp/out
           git init -q -b apk
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add neurotrack.apk
+          sha256sum neurotrack.apk > neurotrack.apk.sha256
+          split -b 60M neurotrack.apk neurotrack.apk.part-
+          rm neurotrack.apk
+          git add .
           git commit -qm "APK de NeuroTrack (${GITHUB_SHA::7})"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" apk
