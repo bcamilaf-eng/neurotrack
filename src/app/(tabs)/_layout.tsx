@@ -24,8 +24,10 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, minHeight: 64 },
-        tabBarLabelStyle: { fontSize: 11, fontFamily: FONTS.bodySemibold },
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, minHeight: 68, paddingTop: 6 },
+        // Seis pestañas: etiquetas compactas para que «Comunidad» quepa entera.
+        tabBarItemStyle: { paddingHorizontal: 0 },
+        tabBarLabelStyle: { fontSize: 10, fontFamily: FONTS.bodySemibold, letterSpacing: -0.1 },
         sceneStyle: { backgroundColor: colors.background },
       }}
     >
