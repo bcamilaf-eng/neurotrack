@@ -79,7 +79,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
 
 const styles = StyleSheet.create({
   wrapper: { gap: spacing.xs },
-  inputRow: { flexDirection: 'row', alignItems: 'center', borderRadius: radius.md, minHeight: MIN_TOUCH + 4 },
-  input: { flex: 1, paddingHorizontal: spacing.md, paddingVertical: spacing.md },
+  inputRow: { flexDirection: 'row', alignItems: 'center', borderRadius: radius.md, minHeight: MIN_TOUCH + 6 },
+  input: { flex: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
   toggle: { minHeight: MIN_TOUCH, minWidth: MIN_TOUCH, justifyContent: 'center', paddingHorizontal: spacing.md },
 });

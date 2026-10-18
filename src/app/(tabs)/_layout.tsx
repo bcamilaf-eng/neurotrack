@@ -2,6 +2,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
+import { FONTS } from '../../ui/theme';
 import { useAppTheme } from '../../ui/theme/ThemeContext';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -24,7 +25,7 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, minHeight: 64 },
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: 11, fontFamily: FONTS.bodySemibold },
         sceneStyle: { backgroundColor: colors.background },
       }}
     >

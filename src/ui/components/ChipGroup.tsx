@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, View } from 'react-native';
-import { MIN_TOUCH, radius, spacing } from '../theme';
+import { StyleSheet, View } from 'react-native';
+import { spacing } from '../theme';
 import { useAppTheme } from '../theme/ThemeContext';
 import { AppText } from './AppText';
+import { Chip } from './Chip';
 
 export interface ChipGroupProps<K extends string> {
   label: string;
@@ -25,28 +26,16 @@ export function ChipGroup<K extends string>({ label, hint, options, selected, on
         </AppText>
       ) : null}
       <View style={styles.chips}>
-        {options.map((option) => {
-          const on = selected.includes(option.code);
-          return (
-            <Pressable
-              key={option.code}
-              testID={testID ? `${testID}-${option.code}` : undefined}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: on }}
-              accessibilityLabel={option.label}
-              onPress={() => onToggle(option.code)}
-              style={[
-                styles.chip,
-                { backgroundColor: on ? colors.primarySoft : colors.surface, borderColor: on ? colors.primary : colors.border },
-              ]}
-            >
-              <AppText variant="label" color={on ? colors.primary : colors.text}>
-                {on ? '✓ ' : ''}
-                {option.label}
-              </AppText>
-            </Pressable>
-          );
-        })}
+        {options.map((option) => (
+          <Chip
+            key={option.code}
+            testID={testID ? `${testID}-${option.code}` : undefined}
+            role="checkbox"
+            label={option.label}
+            selected={selected.includes(option.code)}
+            onPress={() => onToggle(option.code)}
+          />
+        ))}
       </View>
       {error ? (
         <AppText variant="caption" color={colors.danger} accessibilityRole="alert">
@@ -60,5 +49,4 @@ export function ChipGroup<K extends string>({ label, hint, options, selected, on
 const styles = StyleSheet.create({
   wrapper: { gap: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  chip: { minHeight: MIN_TOUCH, paddingHorizontal: spacing.md, borderRadius: radius.pill, borderWidth: 1.5, justifyContent: 'center' },
 });

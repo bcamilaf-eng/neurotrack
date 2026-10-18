@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { MIN_TOUCH, radius, spacing } from '../theme';
 import { useAppTheme } from '../theme/ThemeContext';
@@ -23,7 +24,7 @@ export function Checkbox({ label, description, checked, onChange, required, test
       accessibilityLabel={required ? `${label} (obligatorio)` : label}
       accessibilityHint={description}
       onPress={() => onChange(!checked)}
-      style={styles.row}
+      style={({ pressed }) => [styles.row, { opacity: pressed ? 0.85 : 1 }]}
     >
       <View
         style={[
@@ -31,11 +32,7 @@ export function Checkbox({ label, description, checked, onChange, required, test
           { borderColor: checked ? colors.primary : colors.border, backgroundColor: checked ? colors.primary : colors.surface },
         ]}
       >
-        {checked ? (
-          <AppText variant="label" color={colors.onPrimary}>
-            ✓
-          </AppText>
-        ) : null}
+        {checked ? <Ionicons name="checkmark" size={18} color={colors.onPrimary} importantForAccessibility="no" /> : null}
       </View>
       <View style={styles.text}>
         <AppText variant="label">
@@ -54,6 +51,6 @@ export function Checkbox({ label, description, checked, onChange, required, test
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start', minHeight: MIN_TOUCH, paddingVertical: spacing.xs },
-  box: { width: 28, height: 28, borderRadius: radius.sm, borderWidth: 2, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
+  box: { width: 26, height: 26, borderRadius: radius.sm - 2, borderWidth: 2, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   text: { flex: 1, gap: 2 },
 });

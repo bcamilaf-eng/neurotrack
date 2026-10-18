@@ -12,5 +12,5 @@ export function contrastRatio(a: string, b: string): number {
 
 /** Texto negro o blanco, el que mejor se lea sobre `background`. */
 export function readableOn(background: string): string {
-  return contrastRatio(background, '#FFFFFF') >= contrastRatio(background, '#121A2E') ? '#FFFFFF' : '#121A2E';
+  return contrastRatio(background, '#FFFFFF') >= contrastRatio(background, '#0F172A') ? '#FFFFFF' : '#0F172A';
 }

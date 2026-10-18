@@ -14,7 +14,8 @@ import { configureNotifications, onReminderOpened } from '../services/notificati
 import { biometrics } from '../services/security/biometrics';
 import { configureServices } from '../state/services';
 import { useSession } from '../state/sessionStore';
-import { AppText, Banner, Screen } from '../ui/components';
+import { AppText, Banner, Screen, ToastProvider } from '../ui/components';
+import { useAppFonts } from '../ui/theme/useAppFonts';
 import { ThemeProvider, useAppTheme } from '../ui/theme/ThemeContext';
 
 configureServices({
@@ -31,13 +32,25 @@ cleanupExports();
 export default function RootLayout() {
   const theme = useSession((s) => s.settings?.theme);
   const textScale = useSession((s) => s.settings?.textScale);
+  const fontsReady = useAppFonts();
   return (
     <SafeAreaProvider>
       <ThemeProvider preference={theme} textScale={textScale}>
-        <AppNavigator />
+        {fontsReady ? (
+          <ToastProvider>
+            <AppNavigator />
+          </ToastProvider>
+        ) : (
+          <Blank />
+        )}
       </ThemeProvider>
     </SafeAreaProvider>
   );
+}
+
+function Blank() {
+  const { colors } = useAppTheme();
+  return <View style={[styles.center, { backgroundColor: colors.background }]} />;
 }
 
 function AppNavigator() {

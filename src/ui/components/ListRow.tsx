@@ -1,5 +1,6 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { MIN_TOUCH, spacing } from '../theme';
+import { MIN_TOUCH, radius, spacing } from '../theme';
 import { useAppTheme } from '../theme/ThemeContext';
 import { AppText } from './AppText';
 
@@ -11,7 +12,7 @@ export interface ListRowProps {
   destructive?: boolean;
 }
 
-/** Fila de lista navegable (ajustes, perfil). */
+/** Fila de lista navegable (ajustes, perfil). Al pulsarla se ilumina el fondo al instante. */
 export function ListRow({ title, subtitle, value, onPress, destructive }: ListRowProps) {
   const { colors } = useAppTheme();
   return (
@@ -20,7 +21,10 @@ export function ListRow({ title, subtitle, value, onPress, destructive }: ListRo
       accessibilityLabel={[title, value, subtitle].filter(Boolean).join('. ')}
       disabled={!onPress}
       onPress={onPress}
-      style={({ pressed }) => [styles.row, { borderBottomColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
+      style={({ pressed }) => [
+        styles.row,
+        { borderBottomColor: colors.border, backgroundColor: pressed ? colors.surfaceMuted : 'transparent' },
+      ]}
     >
       <View style={styles.text}>
         <AppText variant="label" color={destructive ? colors.danger : undefined}>
@@ -33,11 +37,7 @@ export function ListRow({ title, subtitle, value, onPress, destructive }: ListRo
         ) : null}
       </View>
       {value ? <AppText muted>{value}</AppText> : null}
-      {onPress ? (
-        <AppText muted importantForAccessibility="no">
-          ›
-        </AppText>
-      ) : null}
+      {onPress ? <Ionicons name="chevron-forward" size={18} color={colors.textMuted} importantForAccessibility="no" /> : null}
     </Pressable>
   );
 }
@@ -47,8 +47,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    minHeight: MIN_TOUCH + 8,
-    paddingVertical: spacing.sm,
+    minHeight: MIN_TOUCH + 12,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
+    marginHorizontal: -spacing.sm,
+    borderRadius: radius.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   text: { flex: 1, gap: 2 },

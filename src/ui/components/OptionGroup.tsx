@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, View } from 'react-native';
-import { MIN_TOUCH, radius, spacing } from '../theme';
+import { StyleSheet, View } from 'react-native';
+import { spacing } from '../theme';
 import { useAppTheme } from '../theme/ThemeContext';
 import { AppText } from './AppText';
+import { Chip } from './Chip';
 
 export interface OptionGroupProps<K extends string> {
   label: string;
@@ -23,25 +24,13 @@ export function OptionGroup<K extends string>({ label, options, value, onChange,
         {options.map((option) => {
           const selected = option.code === value;
           return (
-            <Pressable
+            <Chip
               key={option.code}
-              accessibilityRole="radio"
-              accessibilityState={{ selected }}
-              accessibilityLabel={option.label}
+              role="radio"
+              label={option.label}
+              selected={selected}
               onPress={() => onChange(selected && allowClear ? undefined : option.code)}
-              style={[
-                styles.chip,
-                {
-                  backgroundColor: selected ? colors.primarySoft : colors.surface,
-                  borderColor: selected ? colors.primary : colors.border,
-                },
-              ]}
-            >
-              <AppText variant="label" color={selected ? colors.primary : colors.text}>
-                {selected ? '✓ ' : ''}
-                {option.label}
-              </AppText>
-            </Pressable>
+            />
           );
         })}
       </View>
@@ -57,11 +46,4 @@ export function OptionGroup<K extends string>({ label, options, value, onChange,
 const styles = StyleSheet.create({
   wrapper: { gap: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  chip: {
-    minHeight: MIN_TOUCH,
-    paddingHorizontal: spacing.lg,
-    borderRadius: radius.pill,
-    borderWidth: 1.5,
-    justifyContent: 'center',
-  },
 });
