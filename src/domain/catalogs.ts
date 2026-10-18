@@ -188,7 +188,8 @@ export const CONSENT_TYPE_CODES = codes<ConsentType>(CONSENT_TYPES);
 export const REQUIRED_CONSENTS: readonly ConsentType[] = ['terms', 'health_data'];
 
 /** Versión vigente de los textos legales; al cambiarla se vuelve a pedir consentimiento. */
-export const CURRENT_CONSENT_VERSION = '2026-10-06';
+// Subirla vuelve a pedir los consentimientos: 2026-10-18 suma comunidad, Health Connect y perfil ampliado.
+export const CURRENT_CONSENT_VERSION = '2026-10-18';
 
 export function labelOf<K extends string>(catalog: Catalog<K>, code: K): string {
   return catalog.find((item) => item.code === code)?.label ?? code;
