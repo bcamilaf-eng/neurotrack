@@ -1,4 +1,4 @@
-/** Inicio: cómo va hoy, registro rápido, resumen del mes y evolución de las últimas semanas. */
+/** Inicio: cómo va hoy, registro rápido, resumen del mes y evolución de la última semana o el último mes. */
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { router } from 'expo-router';
@@ -9,7 +9,6 @@ import { LOCAL_MODE_NOTICE } from '../../i18n/es';
 import { useSession } from '../../state/sessionStore';
 import {
   AppText,
-  BarChart,
   Banner,
   Card,
   Disclaimer,
@@ -20,7 +19,8 @@ import {
 } from '../../ui/components';
 import { QuickActions } from '../../ui/features/dashboard/QuickActions';
 import { TodayCard } from '../../ui/features/dashboard/TodayCard';
-import { CHART_WEEKS, useDashboard } from '../../ui/features/dashboard/useDashboard';
+import { TrendCard } from '../../ui/features/dashboard/TrendCard';
+import { useDashboard } from '../../ui/features/dashboard/useDashboard';
 import { spacing } from '../../ui/theme';
 import { clock } from '../../utils/clock';
 import { formatDuration } from '../../utils/time';
@@ -30,8 +30,6 @@ function greeting(hour: number) {
   if (hour < 20) return 'Buenas tardes';
   return 'Buenas noches';
 }
-
-const weekLabel = (weekStart: string) => format(parseISO(weekStart), 'd MMM', { locale: es });
 
 function Metric({ value, label }: { value: string; label: string }) {
   return (
@@ -62,8 +60,6 @@ export default function HomeScreen() {
   };
 
   const month = data?.month;
-  const weeks = data?.weeks ?? [];
-  const totalWeeks = weeks.reduce((n, w) => n + w.episodes, 0);
   const monthName = format(now, 'MMMM', { locale: es });
 
   return (
@@ -116,32 +112,11 @@ export default function HomeScreen() {
         </Card>
       </FadeIn>
 
-      <FadeIn delay={180}>
-        <Card>
-          <AppText variant="heading">Últimas {CHART_WEEKS} semanas</AppText>
-          <BarChart
-            title="Episodios por semana"
-            data={weeks.map((w) => ({ label: weekLabel(w.weekStart), value: w.episodes }))}
-            summary={`${totalWeeks} ${totalWeeks === 1 ? 'episodio registrado' : 'episodios registrados'} en ${CHART_WEEKS} semanas.`}
-          />
-          <BarChart
-            title="Intensidad promedio por semana"
-            data={weeks.map((w) => ({ label: weekLabel(w.weekStart), value: w.avgIntensity }))}
-            max={10}
-            format={(v) => v.toLocaleString('es-ES')}
-            summary="Promedio de la intensidad máxima de los episodios de cada semana, de 0 a 10."
-          />
-          <BarChart
-            title="Duración promedio por semana (horas)"
-            data={weeks.map((w) => ({
-              label: weekLabel(w.weekStart),
-              value: w.avgDurationMin === null ? null : Math.round((w.avgDurationMin / 60) * 10) / 10,
-            }))}
-            format={(v) => v.toLocaleString('es-ES')}
-            summary="Solo cuenta los episodios ya terminados."
-          />
-        </Card>
-      </FadeIn>
+      {data ? (
+        <FadeIn delay={180}>
+          <TrendCard daily={data.daily} />
+        </FadeIn>
+      ) : null}
 
       {data && data.recent.length > 0 ? (
         <Card>

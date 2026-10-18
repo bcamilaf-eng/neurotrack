@@ -1,4 +1,5 @@
 import {
+  dailySeries,
   daysSinceLast,
   episodeDays,
   type EpisodeLike,
@@ -77,5 +78,29 @@ describe('semanas', () => {
     expect(weeks.map((w) => w.episodes)).toEqual([3, 1, 0]);
     expect(weeks[0].avgIntensity).toBe(6.3);
     expect(weeks[2].avgIntensity).toBeNull();
+  });
+});
+
+describe('serie diaria', () => {
+  it('devuelve un punto por día con la intensidad máxima de ese día', () => {
+    const series = dailySeries(
+      [
+        ep('2026-10-13T08:00:00Z', '2026-10-13T10:00:00Z', 4),
+        ep('2026-10-13T18:00:00Z', '2026-10-13T20:00:00Z', 7),
+        ep('2026-10-10T22:00:00Z', '2026-10-11T03:00:00Z', 6),
+      ],
+      7,
+      NOW,
+    );
+    expect(series.map((d) => d.date)).toEqual([
+      '2026-10-08',
+      '2026-10-09',
+      '2026-10-10',
+      '2026-10-11',
+      '2026-10-12',
+      '2026-10-13',
+      '2026-10-14',
+    ]);
+    expect(series.map((d) => d.maxIntensity)).toEqual([null, null, 6, 6, null, 7, null]);
   });
 });

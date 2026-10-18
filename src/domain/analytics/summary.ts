@@ -99,3 +99,23 @@ export function weeklyBuckets(episodes: EpisodeLike[], weeks: number, now: Date 
   }
   return buckets;
 }
+
+export interface DayPoint {
+  date: string;
+  /** Mayor intensidad de los episodios que tocaron ese día, o `null` si no hubo dolor. */
+  maxIntensity: number | null;
+}
+
+/** Los últimos `days` días hasta hoy (incluido), con la intensidad máxima de cada uno. */
+export function dailySeries(episodes: EpisodeLike[], days: number, now: Date = new Date()): DayPoint[] {
+  const max = new Map<string, number>();
+  for (const episode of episodes) {
+    for (const day of episodeDays(episode, now)) {
+      max.set(day, Math.max(max.get(day) ?? 0, episode.maxIntensity));
+    }
+  }
+  return Array.from({ length: days }, (_, i) => {
+    const date = format(addDays(now, i - days + 1), 'yyyy-MM-dd');
+    return { date, maxIntensity: max.has(date) ? (max.get(date) as number) : null };
+  });
+}

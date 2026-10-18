@@ -20,3 +20,4 @@ export { PressableScale } from './PressableScale';
 export { SegmentedControl } from './SegmentedControl';
 export { ToastProvider, useToast } from './Toast';
 export { FadeIn } from './FadeIn';
+export { DayBars } from './DayBars';

@@ -3,7 +3,7 @@ import { addDays, format, startOfMonth, startOfWeek } from 'date-fns';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import type { EpisodeRecord } from '../../../data/repositories/episodeRepository';
-import { daysSinceLast, type PeriodSummary, summarize, type WeekBucket, weeklyBuckets } from '../../../domain/analytics/summary';
+import { dailySeries, type DayPoint, daysSinceLast, type PeriodSummary, summarize, type WeekBucket, weeklyBuckets } from '../../../domain/analytics/summary';
 import { sleepHours } from '../../../domain/entities/habits';
 import { getRepositories } from '../../../state/services';
 import { useSession } from '../../../state/sessionStore';
@@ -26,6 +26,8 @@ export interface DashboardData {
   month: PeriodSummary;
   daysSinceLast: number | null;
   weeks: WeekBucket[];
+  /** Intensidad máxima por día, últimos 30 días. */
+  daily: DayPoint[];
   ongoing: EpisodeRecord[];
   recent: EpisodeRecord[];
   todayPainFree: boolean;
@@ -69,6 +71,7 @@ export function useDashboard() {
       month: summarize(episodes, format(monthStart, 'yyyy-MM-dd'), today, now),
       daysSinceLast: daysSinceLast(latest, now),
       weeks: weeklyBuckets(episodes, CHART_WEEKS, now),
+      daily: dailySeries(episodes, 30, now),
       ongoing,
       recent: [...episodes].sort((a, b) => b.startedAt.localeCompare(a.startedAt)).slice(0, 5),
       todayPainFree: !!daily?.painFree,
