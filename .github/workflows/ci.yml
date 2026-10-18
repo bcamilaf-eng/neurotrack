@@ -38,6 +38,21 @@ jobs:
         run: |
           psql -v ON_ERROR_STOP=1 -f supabase/tests/00_auth_stub.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006000000_esquema_inicial.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261018000000_comunidad.sql
+      # Antes que rls_isolation.sql, que concede permisos amplios para sus propias pruebas.
+      - name: Comprobar las reglas de la comunidad
+        run: |
+          out=$(psql -f supabase/tests/community_rls.sql 2>&1)
+          echo "$out"
+          echo "$out" | grep -q 'Acepta las normas de la comunidad para participar'
+          echo "$out" | grep -q 'community_profiles_alias'
+          echo "$out" | grep -q 'No puedes reportar lo que escribiste'
+          echo "$out" | grep -q 'permission denied for table community_posts'
+          echo "$out" | grep -A2 'temas_visibles_para_b' | grep -qE '^\s+1$'
+          echo "$out" | grep -A2 'reportes_visibles_para_c' | grep -qE '^\s+1$'
+          echo "$out" | grep -A2 'temas_tras_tres_reportes' | grep -qE '^\s+0$'
+          echo "$out" | grep -A2 'respuestas_contadas' | grep -qE '^\s+1$'
+          echo "$out" | grep -A2 'temas_tras_borrar_cuenta' | grep -qE '^\s+0$'
       - name: Comprobar aislamiento por usuario
         run: |
           out=$(psql -f supabase/tests/rls_isolation.sql 2>&1)

@@ -266,6 +266,11 @@ export class AccountRepository {
         await this.db.run(`DELETE FROM ${table} WHERE user_id = ?`, [userId]);
       }
       if (!options.keepAccount) {
+        // Lo publicado en la comunidad local no es clínico, pero se va con la cuenta.
+        await this.db.run(`DELETE FROM community_reports WHERE reporter_id = ?`, [userId]);
+        await this.db.run(`DELETE FROM community_replies WHERE author_id = ?`, [userId]);
+        await this.db.run(`DELETE FROM community_posts WHERE author_id = ?`, [userId]);
+        await this.db.run(`DELETE FROM community_profiles WHERE user_id = ?`, [userId]);
         await this.db.run(`DELETE FROM user_settings WHERE user_id = ?`, [userId]);
         await this.db.run(`DELETE FROM users WHERE id = ?`, [userId]);
       }

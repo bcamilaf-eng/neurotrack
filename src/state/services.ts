@@ -5,6 +5,8 @@
 import type { SqlDatabase } from '../data/db/types';
 import { createRepositories, type Repositories } from '../data/repositories';
 import type { AuthService } from '../services/auth/types';
+import { createLocalCommunityService } from '../services/community/localCommunity';
+import type { CommunityService } from '../services/community/types';
 import type { BiometricService } from '../services/security/biometrics';
 
 export interface AppServices {
@@ -12,14 +14,18 @@ export interface AppServices {
   openDatabase: () => Promise<SqlDatabase>;
   destroyLocalData: () => Promise<void>;
   biometrics: BiometricService;
+  /** Comunidad sobre la base local o la nube. Por defecto, la local (pruebas y modo local). */
+  community?: (db: SqlDatabase) => CommunityService;
 }
 
 let services: AppServices | null = null;
 let repositories: Promise<Repositories> | null = null;
+let community: Promise<CommunityService> | null = null;
 
 export function configureServices(next: AppServices): void {
   services = next;
   repositories = null;
+  community = null;
 }
 
 export function getServices(): AppServices {
@@ -39,4 +45,18 @@ export function getRepositories(): Promise<Repositories> {
       });
   }
   return repositories;
+}
+
+/** Comunidad (foros), creada una sola vez sobre la misma base local. */
+export function getCommunity(): Promise<CommunityService> {
+  if (!community) {
+    const { openDatabase, community: create = createLocalCommunityService } = getServices();
+    community = openDatabase()
+      .then(create)
+      .catch((error) => {
+        community = null;
+        throw error;
+      });
+  }
+  return community;
 }

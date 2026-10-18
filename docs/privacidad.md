@@ -14,6 +14,7 @@ Cómo cubre NeuroTrack cada punto del apartado 19 de la especificación.
 | Consentimiento informado | Obligatorios: términos y datos de salud. Opcionales y revocables: sincronización y análisis de patrones. Versionados: un cambio de versión vuelve a pedirlos. |
 | Minimización de datos | Solo email y contraseña son obligatorios. Sin ubicación, contactos, publicidad ni analítica de terceros. |
 | Acceso y portabilidad | Perfil › Privacidad › Exportar todos mis datos (JSON). |
+| Comunidad | Se participa con seudónimo; nunca se publica el email ni ningún registro. Los textos rechazan emails y teléfonos. Cada persona solo escribe y borra lo suyo (RLS, `supabase/tests/community_rls.sql`) y lo publicado se borra al eliminar la cuenta. |
 
 ## Nada sale del teléfono sin una acción explícita
 

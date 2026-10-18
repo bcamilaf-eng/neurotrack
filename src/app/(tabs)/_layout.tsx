@@ -1,4 +1,4 @@
-/** Barra de navegación inferior: Inicio, Registrar, Calendario, Evolución y Perfil. */
+/** Barra de navegación inferior: Inicio, Registrar, Calendario, Evolución, Comunidad y Perfil. */
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
@@ -11,6 +11,7 @@ const TABS: { name: string; title: string; icon: IconName; iconActive: IconName 
   { name: 'registrar', title: 'Registrar', icon: 'add-circle-outline', iconActive: 'add-circle' },
   { name: 'calendario', title: 'Calendario', icon: 'calendar-outline', iconActive: 'calendar' },
   { name: 'evolucion', title: 'Evolución', icon: 'stats-chart-outline', iconActive: 'stats-chart' },
+  { name: 'comunidad', title: 'Comunidad', icon: 'people-outline', iconActive: 'people' },
   { name: 'perfil', title: 'Perfil', icon: 'person-circle-outline', iconActive: 'person-circle' },
 ];
 

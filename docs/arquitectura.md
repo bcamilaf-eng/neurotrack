@@ -46,6 +46,21 @@ Las rutas se protegen con `Stack.Protected` en `src/app/_layout.tsx`: cada grupo
 `daily_records` y `alarm_flags`. Definición local en `src/data/db/migrations.ts` y en la nube en
 `supabase/migrations/`.
 
+La comunidad añade 4 tablas no clínicas: `community_profiles` (seudónimo y normas aceptadas), `community_posts`,
+`community_replies` y `community_reports`. En la nube son compartidas entre todas las cuentas; en el modo local de
+prueba viven en el teléfono con temas de ejemplo.
+
+## Comunidad
+
+Foros por categoría (consejos, experiencias, preguntas, apoyo) en la pestaña Comunidad.
+
+- **Seudónimo obligatorio:** nunca se muestra el email ni ningún registro clínico. Las normas se aceptan al entrar y
+  están versionadas (`COMMUNITY_RULES_VERSION`); cambiarlas vuelve a pedirlas.
+- **Sin datos de contacto:** títulos, textos y seudónimos rechazan emails y teléfonos (`src/domain/community.ts`).
+- **Moderación por reportes:** quien reporta deja de ver ese contenido; con 3 reportes de personas distintas se oculta
+  para todos hasta revisarlo. En Supabase lo hace un disparador, no la app.
+- **Servicio intercambiable:** `src/services/community` elige Supabase o el modo local, igual que la autenticación.
+
 ## Módulos por responsabilidad
 
 | Responsabilidad | Dónde |
@@ -58,6 +73,7 @@ Las rutas se protegen con `Stack.Protected` en `src/app/_layout.tsx`: cada grupo
 | Señales de alarma | `src/domain/alerts/rules.ts` (reglas) y `src/data/repositories/alarmRepository.ts` |
 | Generación de informes | `src/domain/report` (contenido, CSV, HTML) y `src/services/export` (PDF y compartir) |
 | Notificaciones | `src/domain/reminders.ts` (ajustes) y `src/services/notifications` (programación) |
+| Comunidad | `src/domain/community.ts` (normas y validación), `src/services/community` (local o Supabase), `src/app/comunidad` |
 
 ## Flujo de un episodio
 

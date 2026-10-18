@@ -207,6 +207,57 @@ ALTER TABLE headache_episodes ADD COLUMN head_trauma INTEGER CHECK (head_trauma 
 CREATE INDEX alarm_flags_user_detected ON alarm_flags (user_id, detected_at);
 `,
   },
+  {
+    // Comunidad en modo local de prueba. En la nube estas tablas viven en Supabase y son compartidas.
+    version: 3,
+    name: 'comunidad',
+    sql: `
+CREATE TABLE community_profiles (
+  user_id TEXT PRIMARY KEY NOT NULL,
+  alias TEXT NOT NULL UNIQUE COLLATE NOCASE CHECK (length(alias) BETWEEN 3 AND 24),
+  rules_version TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE community_posts (
+  id TEXT PRIMARY KEY NOT NULL,
+  author_id TEXT NOT NULL,
+  author_alias TEXT NOT NULL,
+  category TEXT NOT NULL CHECK (category IN ('tips', 'experiences', 'questions', 'support')),
+  title TEXT NOT NULL CHECK (length(title) BETWEEN 5 AND 120),
+  body TEXT NOT NULL CHECK (length(body) BETWEEN 10 AND 4000),
+  hidden INTEGER NOT NULL DEFAULT 0 CHECK (hidden IN (0, 1)),
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  deleted_at TEXT
+);
+CREATE INDEX community_posts_created ON community_posts (created_at);
+
+CREATE TABLE community_replies (
+  id TEXT PRIMARY KEY NOT NULL,
+  post_id TEXT NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE,
+  author_id TEXT NOT NULL,
+  author_alias TEXT NOT NULL,
+  body TEXT NOT NULL CHECK (length(body) BETWEEN 2 AND 2000),
+  hidden INTEGER NOT NULL DEFAULT 0 CHECK (hidden IN (0, 1)),
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  deleted_at TEXT
+);
+CREATE INDEX community_replies_post ON community_replies (post_id, created_at);
+
+CREATE TABLE community_reports (
+  id TEXT PRIMARY KEY NOT NULL,
+  reporter_id TEXT NOT NULL,
+  target_kind TEXT NOT NULL CHECK (target_kind IN ('post', 'reply')),
+  target_id TEXT NOT NULL,
+  reason TEXT NOT NULL CHECK (reason IN ('medical_advice', 'personal_data', 'offensive', 'spam', 'other')),
+  created_at TEXT NOT NULL,
+  UNIQUE (reporter_id, target_kind, target_id)
+);
+`,
+  },
 ];
 
 export const LATEST_SCHEMA_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version;

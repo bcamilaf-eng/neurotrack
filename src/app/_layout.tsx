@@ -8,6 +8,7 @@ import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { destroyLocalDatabase, openDatabase } from '../data/db/expoDatabase';
 import { createAuthService } from '../services/auth';
+import { createCommunityService } from '../services/community';
 import { cleanupExports } from '../services/export/fileExport';
 import { configureNotifications, onReminderOpened } from '../services/notifications/reminders';
 import { biometrics } from '../services/security/biometrics';
@@ -21,6 +22,7 @@ configureServices({
   openDatabase,
   destroyLocalData: destroyLocalDatabase,
   biometrics,
+  community: createCommunityService,
 });
 configureNotifications();
 // Borra cualquier exportación que hubiera quedado de una sesión anterior.
@@ -102,6 +104,7 @@ function AppNavigator() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="episodio" />
           <Stack.Screen name="registro" />
+          <Stack.Screen name="comunidad" />
           <Stack.Screen
             name="informe"
             options={{

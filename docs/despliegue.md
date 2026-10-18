@@ -25,6 +25,8 @@ Con un PostgreSQL 15+ local:
 ```bash
 psql -f supabase/tests/00_auth_stub.sql
 psql -f supabase/migrations/20261006000000_esquema_inicial.sql
+psql -f supabase/migrations/20261018000000_comunidad.sql
+psql -f supabase/tests/community_rls.sql
 psql -f supabase/tests/rls_isolation.sql
 ```
 
