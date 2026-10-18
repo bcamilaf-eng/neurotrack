@@ -4,6 +4,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import type { EpisodeRecord } from '../../../data/repositories/episodeRepository';
 import { daysSinceLast, type PeriodSummary, summarize, type WeekBucket, weeklyBuckets } from '../../../domain/analytics/summary';
+import { sleepHours } from '../../../domain/entities/habits';
 import { getRepositories } from '../../../state/services';
 import { useSession } from '../../../state/sessionStore';
 import { clock } from '../../../utils/clock';
@@ -11,8 +12,17 @@ import { toLocalDate } from '../../../utils/time';
 
 export const CHART_WEEKS = 8;
 
+/** Lo anotado hoy fuera de los episodios, para el resumen del día. */
+export interface TodaySnapshot {
+  /** Horas dormidas la noche que terminó hoy. */
+  sleepHours: number | null;
+  hydration: { amountMl: number; goalMl: number } | null;
+  medicationCount: number;
+}
+
 export interface DashboardData {
   name?: string;
+  today: TodaySnapshot;
   month: PeriodSummary;
   daysSinceLast: number | null;
   weeks: WeekBucket[];
@@ -20,6 +30,8 @@ export interface DashboardData {
   recent: EpisodeRecord[];
   todayPainFree: boolean;
   todayHasEpisode: boolean;
+  /** Episodios que empezaron hoy. */
+  todayEpisodes: number;
 }
 
 export function useDashboard() {
@@ -37,15 +49,23 @@ export function useDashboard() {
     const from = format(addDays(chartStart < monthStart ? chartStart : monthStart, -7), 'yyyy-MM-dd');
 
     const repos = await getRepositories();
-    const [profile, episodes, latest, ongoing, daily] = await Promise.all([
+    const [profile, episodes, latest, ongoing, daily, sleep, hydration, medications] = await Promise.all([
       repos.account.getProfile(user.id),
       repos.episodes.listBetween(user.id, from, today),
       repos.episodes.latest(user.id),
       repos.episodes.ongoing(user.id),
       repos.daily.getByDate(user.id, today),
+      repos.sleep.getByDate(user.id, today),
+      repos.hydration.getByDate(user.id, today),
+      repos.medications.listBetween(user.id, today, today),
     ]);
     setData({
       name: profile?.name,
+      today: {
+        sleepHours: sleep ? sleepHours(sleep) : null,
+        hydration: hydration ? { amountMl: hydration.amountMl, goalMl: hydration.goalMl } : null,
+        medicationCount: medications.length,
+      },
       month: summarize(episodes, format(monthStart, 'yyyy-MM-dd'), today, now),
       daysSinceLast: daysSinceLast(latest, now),
       weeks: weeklyBuckets(episodes, CHART_WEEKS, now),
@@ -53,6 +73,7 @@ export function useDashboard() {
       recent: [...episodes].sort((a, b) => b.startedAt.localeCompare(a.startedAt)).slice(0, 5),
       todayPainFree: !!daily?.painFree,
       todayHasEpisode: episodes.some((e) => e.date === today) || ongoing.length > 0,
+      todayEpisodes: episodes.filter((e) => e.date === today).length,
     });
   }, [user]);
 

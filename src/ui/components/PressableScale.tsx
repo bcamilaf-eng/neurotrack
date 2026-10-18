@@ -10,6 +10,8 @@ import { motion, useReducedMotion } from '../theme';
 export interface PressableScaleProps extends Omit<PressableProps, 'style' | 'children'> {
   children?: ReactNode;
   style?: StyleProp<ViewStyle>;
+  /** Estilo del área táctil exterior (p. ej. `flex: 1` dentro de una fila). */
+  containerStyle?: StyleProp<ViewStyle>;
   /** Estilo extra mientras se pulsa (p. ej. un fondo más intenso). */
   pressedStyle?: StyleProp<ViewStyle>;
   scaleTo?: number;
@@ -17,6 +19,7 @@ export interface PressableScaleProps extends Omit<PressableProps, 'style' | 'chi
 
 export function PressableScale({
   style,
+  containerStyle,
   pressedStyle,
   scaleTo = motion.pressScale,
   onPressIn,
@@ -34,6 +37,7 @@ export function PressableScale({
   return (
     <Pressable
       {...rest}
+      style={containerStyle}
       disabled={disabled}
       onPressIn={(e) => {
         if (!reduced) animateTo(scaleTo);

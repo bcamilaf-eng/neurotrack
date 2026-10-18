@@ -16,6 +16,7 @@ import {
   Screen,
   SwitchRow,
   TextField,
+  useToast,
 } from '../../ui/components';
 import { confirmDestructive } from '../../ui/confirm';
 import type { StoredRecord } from '../../data/repositories/recordRepository';
@@ -38,12 +39,16 @@ const SLEEP_FORM: DayFormConfig<SleepDraft, StoredRecord<SleepData>> = {
 export default function SleepScreen() {
   const initialDate = useDayParam();
   const form = useDayForm(SLEEP_FORM, initialDate);
+  const toast = useToast();
   const { draft, set, errors } = form;
   const hours = previewSleepHours(draft);
 
   const save = async () => {
     const ok = await form.submit((repos, userId, d) => repos.sleep.upsertForDay(userId, sleepDraftToInput(d)));
-    if (ok) router.back();
+    if (ok) {
+      toast.show('Sueño guardado');
+      router.back();
+    }
   };
 
   const remove = async () => {

@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { HYDRATION_LEVEL_LABELS } from '../../domain/catalogs';
 import { DEFAULT_GLASS_ML, type HydrationData } from '../../domain/entities/habits';
 import { addGlasses, emptyHydrationDraft, type HydrationDraft, hydrationDraftToInput, hydrationToDraft } from '../../domain/usecases/habitDrafts';
-import { AppText, Banner, Button, Card, DateTimeField, ProgressRing, ScaleField, Screen, TextField } from '../../ui/components';
+import { AppText, Banner, Button, Card, DateTimeField, ProgressRing, ScaleField, Screen, TextField, useToast } from '../../ui/components';
 import { confirmDestructive } from '../../ui/confirm';
 import type { StoredRecord } from '../../data/repositories/recordRepository';
 import { type DayFormConfig, useDayForm } from '../../ui/features/habits/useDayForm';
@@ -25,6 +25,7 @@ const HYDRATION_FORM: DayFormConfig<HydrationDraft, StoredRecord<HydrationData>>
 export default function HydrationScreen() {
   const initialDate = useDayParam();
   const form = useDayForm(HYDRATION_FORM, initialDate);
+  const toast = useToast();
   const { draft, set, errors } = form;
   const amount = valid(parseOptionalNumber(draft.amountMl));
   const goal = valid(parseOptionalNumber(draft.goalMl));
@@ -32,7 +33,10 @@ export default function HydrationScreen() {
 
   const save = async () => {
     const ok = await form.submit((repos, userId, d) => repos.hydration.upsertForDay(userId, hydrationDraftToInput(d)));
-    if (ok) router.back();
+    if (ok) {
+      toast.show('Hidratación guardada');
+      router.back();
+    }
   };
 
   const remove = async () => {

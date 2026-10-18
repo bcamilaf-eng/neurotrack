@@ -1,4 +1,5 @@
 /** Registro de una toma. `?episodio=<id>` la vincula a ese episodio. */
+import { useToast } from '../../../ui/components';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { emptyMedicationDraft } from '../../../domain/usecases/medicationDraft';
@@ -9,6 +10,7 @@ import { clock } from '../../../utils/clock';
 
 export default function NewMedicationScreen() {
   const user = useSession((s) => s.user);
+  const toast = useToast();
   const { episodio } = useLocalSearchParams<{ episodio?: string }>();
   const [initialDraft] = useState(() => emptyMedicationDraft(clock.now(), episodio || undefined));
 
@@ -20,7 +22,10 @@ export default function NewMedicationScreen() {
         const repos = await getRepositories();
         await repos.medications.create(user!.id, input);
       }}
-      onSaved={() => router.back()}
+      onSaved={() => {
+        toast.show('Toma guardada');
+        router.back();
+      }}
     />
   );
 }

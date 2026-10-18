@@ -5,7 +5,7 @@ import { ValidationError } from '../../domain/errors';
 import type { DailyRecordData } from '../../domain/entities/habits';
 import { type DailyDraft, dailyDraftToInput, dailyToDraft, emptyDailyDraft } from '../../domain/usecases/habitDrafts';
 import { SUBJECTIVE_NOTICE } from '../../i18n/es';
-import { Banner, Button, DateTimeField, ScaleField, Screen, SwitchRow, TextField } from '../../ui/components';
+import { Banner, Button, DateTimeField, ScaleField, Screen, SwitchRow, TextField, useToast } from '../../ui/components';
 import { confirmDestructive } from '../../ui/confirm';
 import type { StoredRecord } from '../../data/repositories/recordRepository';
 import { type DayFormConfig, useDayForm } from '../../ui/features/habits/useDayForm';
@@ -22,6 +22,7 @@ const DAILY_FORM: DayFormConfig<DailyDraft, StoredRecord<DailyRecordData>> = {
 export default function DailyStateScreen() {
   const initialDate = useDayParam();
   const form = useDayForm(DAILY_FORM, initialDate);
+  const toast = useToast();
   const { draft, set, errors } = form;
 
   const save = async () => {
@@ -35,7 +36,10 @@ export default function DailyStateScreen() {
       }
       await repos.daily.upsertForDay(userId, input);
     });
-    if (ok) router.back();
+    if (ok) {
+      toast.show('Estado del día guardado');
+      router.back();
+    }
   };
 
   const remove = async () => {
