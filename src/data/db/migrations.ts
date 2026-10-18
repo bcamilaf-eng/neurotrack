@@ -269,6 +269,38 @@ ALTER TABLE users ADD COLUMN other_conditions TEXT;
 ALTER TABLE users ADD COLUMN profile_prompted_at TEXT;
 `,
   },
+  {
+    // Datos importados de Health Connect: la calidad del sueño pasa a ser opcional (no se puede
+    // importar, es una valoración personal) y el registro del día anota la menstruación.
+    version: 5,
+    name: 'salud_conectada',
+    sql: `
+CREATE TABLE sleep_records_v5 (${COMMON},
+  date TEXT NOT NULL,
+  bedtime_at TEXT NOT NULL,
+  wake_at TEXT NOT NULL,
+  hours REAL NOT NULL CHECK (hours > 0 AND hours <= 24),
+  quality INTEGER CHECK (quality IS NULL OR quality BETWEEN 1 AND 5),
+  awakenings INTEGER NOT NULL DEFAULT 0 CHECK (awakenings >= 0),
+  insomnia INTEGER NOT NULL DEFAULT 0 CHECK (insomnia IN (0, 1)),
+  restorative INTEGER CHECK (restorative IS NULL OR restorative IN (0, 1)),
+  notes TEXT,
+  source TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('manual', 'health_connect', 'healthkit'))
+);
+INSERT INTO sleep_records_v5 (id, user_id, created_at, updated_at, deleted_at, sync_status, date, bedtime_at, wake_at,
+  hours, quality, awakenings, insomnia, restorative, notes)
+  SELECT id, user_id, created_at, updated_at, deleted_at, sync_status, date, bedtime_at, wake_at,
+    hours, quality, awakenings, insomnia, restorative, notes FROM sleep_records;
+DROP TABLE sleep_records;
+ALTER TABLE sleep_records_v5 RENAME TO sleep_records;
+CREATE UNIQUE INDEX sleep_user_date ON sleep_records (user_id, date) WHERE deleted_at IS NULL;
+
+ALTER TABLE hydration_records ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'
+  CHECK (source IN ('manual', 'health_connect', 'healthkit'));
+ALTER TABLE daily_records ADD COLUMN menstruation INTEGER CHECK (menstruation IS NULL OR menstruation IN (0, 1));
+ALTER TABLE users ADD COLUMN health_import_at TEXT;
+`,
+  },
 ];
 
 export const LATEST_SCHEMA_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version;

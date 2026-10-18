@@ -116,6 +116,7 @@ export const createSleepRepository = (db: SqlDatabase) =>
       insomnia: { column: 'insomnia', kind: 'bool' },
       restorative: { column: 'restorative', kind: 'bool' },
       notes: { column: 'notes', kind: 'text' },
+      source: { column: 'source', kind: 'text' },
     },
   });
 
@@ -132,6 +133,7 @@ export const createHydrationRepository = (db: SqlDatabase) =>
       glasses: { column: 'glasses', kind: 'int' },
       perceived: { column: 'perceived', kind: 'int' },
       goalMl: { column: 'goal_ml', kind: 'int' },
+      source: { column: 'source', kind: 'text' },
     },
   });
 
@@ -168,6 +170,7 @@ export const createDailyRecordRepository = (db: SqlDatabase) =>
       workload: { column: 'workload', kind: 'int' },
       stressfulSituations: { column: 'stressful_situations', kind: 'text' },
       painFree: { column: 'pain_free', kind: 'bool' },
+      menstruation: { column: 'menstruation', kind: 'bool' },
       notes: { column: 'notes', kind: 'text' },
     },
   });

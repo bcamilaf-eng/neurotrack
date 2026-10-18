@@ -126,6 +126,16 @@ export class AccountRepository {
     await this.db.run('UPDATE users SET profile_prompted_at = ? WHERE id = ?', [clock.now().toISOString(), userId]);
   }
 
+  /** Última importación desde el almacén de salud del teléfono, o `null`. */
+  async getHealthImport(userId: string): Promise<string | null> {
+    const row = await this.db.first<{ health_import_at: string | null }>('SELECT health_import_at FROM users WHERE id = ?', [userId]);
+    return row?.health_import_at ?? null;
+  }
+
+  async markHealthImport(userId: string, at: string): Promise<void> {
+    await this.db.run('UPDATE users SET health_import_at = ? WHERE id = ?', [at, userId]);
+  }
+
   async getSettings(userId: string): Promise<UserSettings> {
     const row = await this.db.first<Record<string, unknown>>(
       `SELECT * FROM user_settings WHERE user_id = ?`,

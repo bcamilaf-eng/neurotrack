@@ -15,16 +15,22 @@ import {
 } from '../validation/common';
 import { minutesBetween } from '../../utils/time';
 
+/** De dónde viene un registro: escrito en la app o importado del almacén de salud del teléfono. */
+export const RECORD_SOURCES = ['manual', 'health_connect', 'healthkit'] as const;
+export type RecordSource = (typeof RECORD_SOURCES)[number];
+
 export const sleepInputSchema = z
   .object({
     date: pastOrTodayDate,
     bedtimeAt: pastInstant,
     wakeAt: pastInstant,
-    quality: intInRange(1, 5),
+    /** Valoración personal; los registros importados no la traen. */
+    quality: intInRange(1, 5).optional(),
     awakenings: intInRange(0, 30).default(0),
     insomnia: z.boolean().default(false),
     restorative: z.boolean().optional(),
     notes: optionalText(500),
+    source: z.enum(RECORD_SOURCES).default('manual'),
   })
   .superRefine((value, ctx) => {
     const minutes = minutesBetween(value.bedtimeAt, value.wakeAt);
@@ -59,6 +65,7 @@ export const hydrationInputSchema = z.object({
   glasses: intInRange(0, 40).optional(),
   perceived: intInRange(1, 5).optional(),
   goalMl: intInRange(500, 6000).default(DEFAULT_HYDRATION_GOAL_ML),
+  source: z.enum(RECORD_SOURCES).default('manual'),
 });
 
 export type HydrationInput = z.input<typeof hydrationInputSchema>;
@@ -106,6 +113,8 @@ export const dailyRecordInputSchema = z.object({
   workload: intInRange(1, 5).optional(),
   stressfulSituations: optionalText(500),
   painFree: z.boolean().default(false),
+  /** Día con menstruación (anotado o importado). */
+  menstruation: z.boolean().optional(),
   notes: optionalText(1000),
 });
 

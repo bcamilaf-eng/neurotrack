@@ -40,6 +40,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006000000_esquema_inicial.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261018000000_comunidad.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261018010000_perfil_ampliado.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261018020000_salud_conectada.sql
       # Antes que rls_isolation.sql, que concede permisos amplios para sus propias pruebas.
       - name: Comprobar las reglas de la comunidad
         run: |

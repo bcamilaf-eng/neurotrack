@@ -20,6 +20,11 @@ export default function ProfileHome() {
       <View>
         <ListRow title="Datos personales" subtitle="Opcionales, y contacto de emergencia" onPress={() => router.push('/perfil/datos')} />
         <ListRow
+          title="Datos de salud del teléfono"
+          subtitle="Importa peso, sueño, agua y ciclo desde Health Connect"
+          onPress={() => router.push('/perfil/salud')}
+        />
+        <ListRow
           title="Seguridad"
           subtitle="Bloqueo con Face ID, huella o código"
           value={settings?.biometricLock ? 'Activado' : 'Desactivado'}

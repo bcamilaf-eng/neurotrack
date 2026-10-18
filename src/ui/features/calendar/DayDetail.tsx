@@ -51,7 +51,9 @@ export function DayDetail({ day }: { day: DayRecords }) {
       {day.sleep ? (
         <ListRow
           title="Sueño"
-          subtitle={`${sleepHours(day.sleep).toLocaleString('es-ES')} h · calidad ${SLEEP_QUALITY_LABELS[day.sleep.quality - 1].toLowerCase()}`}
+          subtitle={`${sleepHours(day.sleep).toLocaleString('es-ES')} h${
+            day.sleep.quality ? ` · calidad ${SLEEP_QUALITY_LABELS[day.sleep.quality - 1].toLowerCase()}` : ''
+          }${day.sleep.source === 'manual' ? '' : ' · importado'}`}
           onPress={() => open('/registro/sueno')}
         />
       ) : null}
