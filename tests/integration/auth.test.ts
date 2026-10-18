@@ -149,6 +149,13 @@ describe('estado de sesión', () => {
     expect(useSession.getState().status).toBe('needsConsent');
 
     await useSession.getState().acceptConsents({ terms: true, health_data: true, cloud_sync: false });
+    expect(useSession.getState().status).toBe('needsProfile');
+
+    // Completar el perfil es opcional y se ofrece una sola vez.
+    await useSession.getState().finishProfilePrompt();
+    expect(useSession.getState().status).toBe('ready');
+    await useSession.getState().signOut();
+    await useSession.getState().signIn({ email: 'ana@ejemplo.com', password: PASSWORD });
     expect(useSession.getState().status).toBe('ready');
   });
 
@@ -164,6 +171,7 @@ describe('estado de sesión', () => {
   it('bloquea al volver de segundo plano si pasó el tiempo configurado', async () => {
     await useSession.getState().signUp({ email: 'ana@ejemplo.com', password: PASSWORD, confirmPassword: PASSWORD });
     await useSession.getState().acceptConsents({ terms: true, health_data: true });
+    await useSession.getState().finishProfilePrompt();
     await useSession.getState().setBiometricLock(true);
     expect(useSession.getState().settings?.biometricLock).toBe(true);
 
@@ -187,6 +195,7 @@ describe('estado de sesión', () => {
   it('pide desbloqueo al reabrir la app si el bloqueo está activo', async () => {
     await useSession.getState().signUp({ email: 'ana@ejemplo.com', password: PASSWORD, confirmPassword: PASSWORD });
     await useSession.getState().acceptConsents({ terms: true, health_data: true });
+    await useSession.getState().finishProfilePrompt();
     await useSession.getState().setBiometricLock(true);
     useSession.setState({ status: 'initializing', user: null });
     await useSession.getState().initialize();

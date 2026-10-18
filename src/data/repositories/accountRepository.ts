@@ -66,6 +66,9 @@ const PROFILE_COLUMNS: ColumnMap<ProfileData> = {
   weightKg: { column: 'weight_kg', kind: 'real' },
   heightCm: { column: 'height_cm', kind: 'real' },
   country: { column: 'country', kind: 'text' },
+  occupation: { column: 'occupation', kind: 'text' },
+  diagnoses: { column: 'diagnoses', kind: 'json' },
+  otherConditions: { column: 'other_conditions', kind: 'text' },
   trackingNotes: { column: 'tracking_notes', kind: 'text' },
   pregnantOrPostpartum: { column: 'pregnant_or_postpartum', kind: 'bool' },
 };
@@ -108,6 +111,19 @@ export class AccountRepository {
     const profile = await this.getProfile(userId);
     if (!profile) throw new Error('Perfil no encontrado.');
     return profile;
+  }
+
+  /** Si ya se le ofreció completar el perfil al entrar (lo completara o no). */
+  async wasProfilePrompted(userId: string): Promise<boolean> {
+    const row = await this.db.first<{ profile_prompted_at: string | null }>(
+      'SELECT profile_prompted_at FROM users WHERE id = ?',
+      [userId],
+    );
+    return !!row?.profile_prompted_at;
+  }
+
+  async markProfilePrompted(userId: string): Promise<void> {
+    await this.db.run('UPDATE users SET profile_prompted_at = ? WHERE id = ?', [clock.now().toISOString(), userId]);
   }
 
   async getSettings(userId: string): Promise<UserSettings> {

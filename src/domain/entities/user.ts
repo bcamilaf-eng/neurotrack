@@ -5,7 +5,7 @@
  * todo lo demás es opcional.
  */
 import { z } from 'zod';
-import { CONSENT_TYPE_CODES, SEX_CODES } from '../catalogs';
+import { CONSENT_TYPE_CODES, HEADACHE_DIAGNOSIS_CODES, SEX_CODES } from '../catalogs';
 import { numberInRange, optionalText, pastOrTodayDate } from '../validation/common';
 import { ageFromBirthDate } from '../../utils/time';
 import { clock } from '../../utils/clock';
@@ -49,6 +49,11 @@ export const profileInputSchema = z.object({
   weightKg: numberInRange(20, 300).optional(),
   heightCm: numberInRange(50, 250).optional(),
   country: optionalText(60),
+  occupation: optionalText(80),
+  /** Diagnósticos de cefalea que indica la persona. */
+  diagnoses: z.array(z.enum(HEADACHE_DIAGNOSIS_CODES)).max(HEADACHE_DIAGNOSIS_CODES.length).optional(),
+  /** Otras enfermedades diagnosticadas (hipertensión, ansiedad…), en texto libre. */
+  otherConditions: optionalText(300),
   trackingNotes: optionalText(1000),
   pregnantOrPostpartum: z.boolean().optional(),
 });

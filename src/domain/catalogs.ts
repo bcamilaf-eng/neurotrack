@@ -160,6 +160,21 @@ export const SEX_OPTIONS = [
 export type Sex = (typeof SEX_OPTIONS)[number]['code'];
 export const SEX_CODES = codes<Sex>(SEX_OPTIONS);
 
+/** Diagnósticos de cefalea que la persona indica que le hicieron. No los pone la app. */
+export const HEADACHE_DIAGNOSES = [
+  { code: 'migraine_without_aura', label: 'Migraña sin aura' },
+  { code: 'migraine_with_aura', label: 'Migraña con aura' },
+  { code: 'chronic_migraine', label: 'Migraña crónica' },
+  { code: 'menstrual_migraine', label: 'Migraña menstrual' },
+  { code: 'tension', label: 'Cefalea tensional' },
+  { code: 'cluster', label: 'Cefalea en racimos' },
+  { code: 'medication_overuse', label: 'Cefalea por abuso de medicación' },
+  { code: 'not_diagnosed', label: 'Aún sin diagnóstico' },
+  { code: 'other', label: 'Otro' },
+] as const;
+export type HeadacheDiagnosis = (typeof HEADACHE_DIAGNOSES)[number]['code'];
+export const HEADACHE_DIAGNOSIS_CODES = codes<HeadacheDiagnosis>(HEADACHE_DIAGNOSES);
+
 export const CONSENT_TYPES = [
   { code: 'terms', label: 'Términos de uso' },
   { code: 'health_data', label: 'Tratamiento de mis datos de salud' },

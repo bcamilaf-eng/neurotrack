@@ -110,6 +110,9 @@ function AppNavigator() {
         <Stack.Protected guard={status === 'needsConsent'}>
           <Stack.Screen name="consent" />
         </Stack.Protected>
+        <Stack.Protected guard={status === 'needsProfile'}>
+          <Stack.Screen name="perfil-inicial" />
+        </Stack.Protected>
         <Stack.Protected guard={status === 'locked'}>
           <Stack.Screen name="lock" options={{ gestureEnabled: false }} />
         </Stack.Protected>

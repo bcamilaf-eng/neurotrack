@@ -258,6 +258,17 @@ CREATE TABLE community_reports (
 );
 `,
   },
+  {
+    // Perfil más completo y registro de si ya se ofreció completarlo al entrar.
+    version: 4,
+    name: 'perfil_ampliado',
+    sql: `
+ALTER TABLE users ADD COLUMN occupation TEXT;
+ALTER TABLE users ADD COLUMN diagnoses TEXT NOT NULL DEFAULT '[]';
+ALTER TABLE users ADD COLUMN other_conditions TEXT;
+ALTER TABLE users ADD COLUMN profile_prompted_at TEXT;
+`,
+  },
 ];
 
 export const LATEST_SCHEMA_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version;

@@ -5,6 +5,7 @@
  * - `initializing`: abriendo la base cifrada y recuperando la sesión.
  * - `signedOut`: sin sesión; solo se ve el acceso.
  * - `needsConsent`: sesión iniciada pero faltan los consentimientos obligatorios vigentes.
+ * - `needsProfile`: primera entrada; se ofrece completar el perfil (opcional, se puede dejar para más tarde).
  * - `locked`: sesión válida, pero la app pide biometría antes de mostrar datos.
  * - `ready`: todo listo.
  */
@@ -19,7 +20,7 @@ import { applyReminders, cancelReminders } from '../services/notifications/remin
 import { clock } from '../utils/clock';
 import { getRepositories, getServices } from './services';
 
-export type SessionStatus = 'initializing' | 'signedOut' | 'needsConsent' | 'locked' | 'ready';
+export type SessionStatus = 'initializing' | 'signedOut' | 'needsConsent' | 'needsProfile' | 'locked' | 'ready';
 
 export interface SessionState {
   status: SessionStatus;
@@ -35,6 +36,8 @@ export interface SessionState {
   signIn(input: { email: string; password: string }): Promise<void>;
   signOut(): Promise<void>;
   acceptConsents(decisions: Partial<Record<ConsentType, boolean>>): Promise<void>;
+  /** Cierra la oferta de completar el perfil (guardado o «más tarde») y entra en la app. */
+  finishProfilePrompt(): Promise<void>;
   unlock(): Promise<boolean>;
   setBiometricLock(enabled: boolean): Promise<void>;
   /** Guarda los recordatorios y los reprograma. Devuelve cuántos quedaron activos. */
@@ -53,12 +56,14 @@ export const useSession = create<SessionState>((set, get) => {
   async function enter(session: AuthSession, { fromColdStart }: { fromColdStart: boolean }) {
     const repos = await getRepositories();
     await repos.account.ensureUser(session.user.id, session.user.email);
-    const [settings, consented] = await Promise.all([
+    const [settings, consented, prompted] = await Promise.all([
       repos.account.getSettings(session.user.id),
       repos.account.hasRequiredConsents(session.user.id),
+      repos.account.wasProfilePrompted(session.user.id),
     ]);
     let status: SessionStatus = 'ready';
     if (!consented) status = 'needsConsent';
+    else if (!prompted) status = 'needsProfile';
     else if (fromColdStart && settings.biometricLock) status = 'locked';
     set({ user: session.user, settings, status });
   }
@@ -126,7 +131,16 @@ export const useSession = create<SessionState>((set, get) => {
         })),
       );
       const consented = await repos.account.hasRequiredConsents(user.id);
-      set({ status: consented ? 'ready' : 'needsConsent' });
+      if (!consented) return set({ status: 'needsConsent' });
+      set({ status: (await repos.account.wasProfilePrompted(user.id)) ? 'ready' : 'needsProfile' });
+    },
+
+    async finishProfilePrompt() {
+      const user = get().user;
+      if (!user) return;
+      const repos = await getRepositories();
+      await repos.account.markProfilePrompted(user.id);
+      set({ status: 'ready' });
     },
 
     async unlock() {

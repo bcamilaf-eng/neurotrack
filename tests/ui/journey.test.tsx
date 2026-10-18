@@ -81,6 +81,8 @@ describe('recorrido completo', () => {
     await useSession.getState().signUp({ email: 'ana@ejemplo.com', password: 'cefalea2026', confirmPassword: 'cefalea2026' });
     expect(useSession.getState().status).toBe('needsConsent');
     await useSession.getState().acceptConsents({ terms: true, health_data: true });
+    expect(useSession.getState().status).toBe('needsProfile');
+    await useSession.getState().finishProfilePrompt();
     expect(useSession.getState().status).toBe('ready');
     const userId = useSession.getState().user!.id;
 

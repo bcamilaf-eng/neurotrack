@@ -2,8 +2,9 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ConsentScreen from '../../src/app/consent';
 import SignInScreen from '../../src/app/(auth)/sign-in';
+import InitialProfileScreen from '../../src/app/perfil-inicial';
 import { createLocalAuthService } from '../../src/services/auth/localAuth';
-import { configureServices } from '../../src/state/services';
+import { configureServices, getRepositories } from '../../src/state/services';
 import { useSession } from '../../src/state/sessionStore';
 import { createTestDatabase } from '../fixtures/testDatabase';
 import * as SecureStore from 'expo-secure-store';
@@ -59,12 +60,44 @@ describe('pantalla de consentimiento', () => {
     await fireEvent.press(screen.getByTestId('consent-health_data'));
     expect(screen.getByTestId('consent-continue').props.accessibilityState.disabled).toBe(false);
     await fireEvent.press(screen.getByTestId('consent-continue'));
-    await waitFor(() => expect(useSession.getState().status).toBe('ready'));
+    await waitFor(() => expect(useSession.getState().status).toBe('needsProfile'));
   });
 
   it('los consentimientos opcionales empiezan desmarcados', async () => {
     await renderScreen(<ConsentScreen />);
     expect(screen.getByTestId('consent-cloud_sync').props.accessibilityState.checked).toBe(false);
     expect(screen.getByTestId('consent-pattern_analysis').props.accessibilityState.checked).toBe(false);
+  });
+});
+
+describe('perfil al entrar por primera vez', () => {
+  beforeEach(async () => {
+    await useSession.getState().signUp({ email: 'ana@ejemplo.com', password: 'cefalea2026', confirmPassword: 'cefalea2026' });
+    await useSession.getState().acceptConsents({ terms: true, health_data: true });
+  });
+
+  it('guarda fecha de nacimiento, ocupación y diagnósticos y entra en la app', async () => {
+    expect(useSession.getState().status).toBe('needsProfile');
+    await renderScreen(<InitialProfileScreen />);
+    await fireEvent.changeText(await screen.findByTestId('profile-birth-date'), '1990-04-23');
+    await fireEvent.changeText(screen.getByTestId('profile-occupation'), 'Enfermera');
+    await fireEvent.press(screen.getByTestId('profile-diagnoses-migraine_with_aura'));
+    await fireEvent.changeText(screen.getByTestId('profile-other-conditions'), 'Hipotiroidismo');
+    await fireEvent.press(screen.getByTestId('profile-initial-save'));
+    await waitFor(() => expect(useSession.getState().status).toBe('ready'));
+
+    const repos = await getRepositories();
+    expect(await repos.account.getProfile(useSession.getState().user!.id)).toMatchObject({
+      birthDate: '1990-04-23',
+      occupation: 'Enfermera',
+      diagnoses: ['migraine_with_aura'],
+      otherConditions: 'Hipotiroidismo',
+    });
+  });
+
+  it('permite dejarlo para más tarde', async () => {
+    await renderScreen(<InitialProfileScreen />);
+    await fireEvent.press(await screen.findByTestId('profile-initial-later'));
+    await waitFor(() => expect(useSession.getState().status).toBe('ready'));
   });
 });
