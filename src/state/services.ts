@@ -8,6 +8,7 @@ import type { AuthService } from '../services/auth/types';
 import { createLocalCommunityService } from '../services/community/localCommunity';
 import type { CommunityService } from '../services/community/types';
 import type { BiometricService } from '../services/security/biometrics';
+import type { RemoteStore } from '../services/sync/engine';
 
 export interface AppServices {
   auth: AuthService;
@@ -16,6 +17,8 @@ export interface AppServices {
   biometrics: BiometricService;
   /** Comunidad sobre la base local o la nube. Por defecto, la local (pruebas y modo local). */
   community?: (db: SqlDatabase) => CommunityService;
+  /** Copia en la nube; `null` o ausente en modo local y en las pruebas. */
+  remote?: RemoteStore | null;
 }
 
 let services: AppServices | null = null;

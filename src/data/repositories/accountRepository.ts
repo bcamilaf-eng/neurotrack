@@ -73,20 +73,24 @@ const PROFILE_COLUMNS: ColumnMap<ProfileData> = {
   pregnantOrPostpartum: { column: 'pregnant_or_postpartum', kind: 'bool' },
 };
 
+const NEVER_EDITED = '1970-01-01T00:00:00.000Z';
+
 export class AccountRepository {
   constructor(private readonly db: SqlDatabase) {}
 
   /** Crea la fila local del usuario tras iniciar sesión, si aún no existe. */
   async ensureUser(userId: string, email: string): Promise<void> {
     const now = clock.now().toISOString();
+    // Perfil y ajustes recién creados quedan «sin cambios» (fecha mínima y ya sincronizados): en un
+    // teléfono nuevo no deben ganarle a lo que la persona ya tenía guardado en la nube.
     await this.db.run(
-      `INSERT INTO users (id, email, created_at, updated_at) VALUES (?, ?, ?, ?)
+      `INSERT INTO users (id, email, created_at, updated_at, sync_status) VALUES (?, ?, ?, ?, 'synced')
        ON CONFLICT(id) DO UPDATE SET email = excluded.email`,
-      [userId, email, now, now],
+      [userId, email, now, NEVER_EDITED],
     );
     await this.db.run(
-      `INSERT INTO user_settings (user_id, updated_at) VALUES (?, ?) ON CONFLICT(user_id) DO NOTHING`,
-      [userId, now],
+      `INSERT INTO user_settings (user_id, updated_at, sync_status) VALUES (?, ?, 'synced') ON CONFLICT(user_id) DO NOTHING`,
+      [userId, NEVER_EDITED],
     );
   }
 
@@ -162,7 +166,7 @@ export class AccountRepository {
     const next = { ...(await this.getSettings(userId)), ...patch };
     await this.db.run(
       `UPDATE user_settings SET theme = ?, text_scale = ?, biometric_lock = ?, lock_after_minutes = ?,
-         reminders = ?, language = ?, updated_at = ?
+         reminders = ?, language = ?, updated_at = ?, sync_status = 'pending'
        WHERE user_id = ?`,
       [
         next.theme,
@@ -298,6 +302,7 @@ export class AccountRepository {
         await this.db.run(`DELETE FROM community_posts WHERE author_id = ?`, [userId]);
         await this.db.run(`DELETE FROM community_profiles WHERE user_id = ?`, [userId]);
         await this.db.run(`DELETE FROM user_settings WHERE user_id = ?`, [userId]);
+        await this.db.run(`DELETE FROM sync_state WHERE user_id = ?`, [userId]);
         await this.db.run(`DELETE FROM users WHERE id = ?`, [userId]);
       }
     });

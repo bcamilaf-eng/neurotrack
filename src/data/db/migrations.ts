@@ -301,6 +301,22 @@ ALTER TABLE daily_records ADD COLUMN menstruation INTEGER CHECK (menstruation IS
 ALTER TABLE users ADD COLUMN health_import_at TEXT;
 `,
   },
+  {
+    // Sincronización con la nube: hasta cuándo se bajaron cambios de cada tabla y ajustes pendientes de subir.
+    version: 6,
+    name: 'sincronizacion',
+    sql: `
+CREATE TABLE sync_state (
+  user_id TEXT NOT NULL,
+  table_name TEXT NOT NULL,
+  pulled_at TEXT NOT NULL,
+  PRIMARY KEY (user_id, table_name)
+);
+ALTER TABLE user_settings ADD COLUMN sync_status TEXT NOT NULL DEFAULT 'pending'
+  CHECK (sync_status IN ('pending', 'synced'));
+ALTER TABLE users ADD COLUMN synced_at TEXT;
+`,
+  },
 ];
 
 export const LATEST_SCHEMA_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version;

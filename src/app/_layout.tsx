@@ -7,12 +7,14 @@ import { useEffect } from 'react';
 import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { destroyLocalDatabase, openDatabase } from '../data/db/expoDatabase';
-import { createAuthService } from '../services/auth';
+import { createAuthService, getSupabaseClient } from '../services/auth';
 import { createCommunityService } from '../services/community';
 import { cleanupExports } from '../services/export/fileExport';
 import { configureNotifications, onReminderOpened } from '../services/notifications/reminders';
 import { biometrics } from '../services/security/biometrics';
+import { createSupabaseRemote } from '../services/sync/supabaseRemote';
 import { configureServices } from '../state/services';
+import { useSync } from '../state/syncStore';
 import { useSession } from '../state/sessionStore';
 import { AppText, Banner, Screen, ToastProvider } from '../ui/components';
 import { useAppFonts } from '../ui/theme/useAppFonts';
@@ -24,6 +26,10 @@ configureServices({
   destroyLocalData: destroyLocalDatabase,
   biometrics,
   community: createCommunityService,
+  remote: (() => {
+    const client = getSupabaseClient();
+    return client ? createSupabaseRemote(client) : null;
+  })(),
 });
 configureNotifications();
 // Borra cualquier exportación que hubiera quedado de una sesión anterior.
@@ -70,9 +76,17 @@ function AppNavigator() {
     [],
   );
 
+  // Copia en la nube: al entrar en la app y cada vez que vuelve a primer plano.
+  useEffect(() => {
+    if (status === 'ready') useSync.getState().run();
+  }, [status]);
+
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'active') onForeground();
+      if (state === 'active') {
+        onForeground();
+        if (useSession.getState().status === 'ready') useSync.getState().run();
+      }
       else if (state === 'background') onBackground();
     });
     return () => sub.remove();

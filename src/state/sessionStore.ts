@@ -44,6 +44,8 @@ export interface SessionState {
   saveReminders(reminders: ReminderSettings): Promise<number>;
   /** Apariencia y bloqueo: tema, tamaño de texto y minutos antes de pedir desbloqueo. */
   updatePreferences(patch: Partial<Pick<UserSettings, 'theme' | 'textScale' | 'lockAfterMinutes'>>): Promise<void>;
+  /** Vuelve a leer los ajustes (p. ej. tras bajarlos de la nube). */
+  reloadSettings(): Promise<void>;
   onBackground(): void;
   onForeground(): void;
   deleteAccount(): Promise<void>;
@@ -178,6 +180,13 @@ export const useSession = create<SessionState>((set, get) => {
       if (!user) return;
       const repos = await getRepositories();
       set({ settings: await repos.account.updateSettings(user.id, patch) });
+    },
+
+    async reloadSettings() {
+      const user = get().user;
+      if (!user) return;
+      const repos = await getRepositories();
+      set({ settings: await repos.account.getSettings(user.id) });
     },
 
     onBackground() {

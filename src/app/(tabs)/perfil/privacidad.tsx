@@ -2,6 +2,8 @@
  * Centro de privacidad: resumen, consentimientos opcionales, copia de tus datos, borrado
  * de registros y eliminación de la cuenta.
  */
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
@@ -10,6 +12,7 @@ import { CONSENT_TEXTS, PRIVACY_SUMMARY } from '../../../i18n/es';
 import { shareJson } from '../../../services/export/fileExport';
 import { getRepositories } from '../../../state/services';
 import { useSession } from '../../../state/sessionStore';
+import { useSync } from '../../../state/syncStore';
 import { AppText, Banner, Button, Card, ListRow, Screen, SwitchRow } from '../../../ui/components';
 import { clock } from '../../../utils/clock';
 import { confirmDestructive } from '../../../ui/confirm';
@@ -17,7 +20,8 @@ import { confirmDestructive } from '../../../ui/confirm';
 const OPTIONAL: ConsentType[] = ['cloud_sync', 'pattern_analysis'];
 
 export default function PrivacyScreen() {
-  const { user, acceptConsents, deleteAccount } = useSession();
+  const { user, mode, acceptConsents, deleteAccount } = useSession();
+  const sync = useSync();
   const [optional, setOptional] = useState<Partial<Record<ConsentType, boolean>>>({});
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -35,6 +39,7 @@ export default function PrivacyScreen() {
     setOptional((o) => ({ ...o, [type]: accepted }));
     try {
       await acceptConsents({ [type]: accepted });
+      if (type === 'cloud_sync' && accepted) await useSync.getState().run();
     } catch {
       setOptional((o) => ({ ...o, [type]: !accepted }));
       setError('No se pudo guardar el cambio.');
@@ -62,7 +67,7 @@ export default function PrivacyScreen() {
     const ok = await confirmDestructive({
       title: '¿Borrar todos tus registros?',
       message:
-        'Se borrarán de este teléfono tus episodios, medicación, hábitos, señales y contacto de emergencia. Tu cuenta, tus consentimientos y tus ajustes se conservan. No se puede deshacer.',
+        'Se borrarán de este teléfono (y de la copia en la nube, si la tienes) tus episodios, medicación, hábitos, señales y contacto de emergencia. Tu cuenta, tus consentimientos y tus ajustes se conservan. No se puede deshacer.',
       confirmLabel: 'Borrar registros',
     });
     if (!ok) return;
@@ -70,6 +75,8 @@ export default function PrivacyScreen() {
     setNotice(null);
     setBusy('records');
     try {
+      // Primero en la nube: si no, la siguiente sincronización los volvería a traer.
+      await useSync.getState().deleteRemoteRecords();
       await (await getRepositories()).account.deleteAllData(user.id, { keepAccount: true });
       setNotice('Se borraron todos tus registros.');
     } catch {
@@ -116,6 +123,20 @@ export default function PrivacyScreen() {
           onChange={(v) => toggle(type, v)}
         />
       ))}
+      {mode === 'cloud' && optional.cloud_sync ? (
+        <Card>
+          <AppText variant="label">Copia en la nube</AppText>
+          <AppText variant="caption" muted>
+            {sync.running
+              ? 'Sincronizando…'
+              : sync.lastSyncAt
+                ? `Última copia: ${format(parseISO(sync.lastSyncAt), "d 'de' MMMM, HH:mm", { locale: es })}`
+                : 'Se sincroniza al abrir la app y al volver a ella.'}
+          </AppText>
+          {sync.lastError ? <Banner tone="warning" message={sync.lastError} /> : null}
+          <Button label="Sincronizar ahora" variant="secondary" icon="cloud-upload-outline" onPress={() => sync.run()} loading={sync.running} testID="sync-now" />
+        </Card>
+      ) : null}
       <AppText variant="heading">Tus datos</AppText>
       {notice ? <Banner tone="info" message={notice} /> : null}
       <AppText variant="caption" muted>
