@@ -10,7 +10,8 @@ import { AppText } from './AppText';
 
 export interface SegmentedControlProps<K extends string> {
   label: string;
-  options: readonly { code: K; label: string }[];
+  /** `short` se muestra si el texto completo no cabe; el lector de pantalla lee `label`. */
+  options: readonly { code: K; label: string; short?: string }[];
   value: K;
   onChange: (value: K) => void;
   testID?: string;
@@ -62,8 +63,8 @@ export function SegmentedControl<K extends string>({ label, options, value, onCh
             onPress={() => onChange(option.code)}
             style={styles.option}
           >
-            <AppText variant="label" color={selected ? colors.text : colors.textMuted}>
-              {option.label}
+            <AppText variant={options.length > 3 ? 'caption' : 'label'} color={selected ? colors.text : colors.textMuted} numberOfLines={1}>
+              {option.short ?? option.label}
             </AppText>
           </Pressable>
         );

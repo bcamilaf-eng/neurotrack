@@ -8,7 +8,7 @@ import type { MedicationRecord } from '../../../data/repositories/habitRepositor
 import { MEDICATION_NOTICE } from '../../../i18n/es';
 import { getRepositories } from '../../../state/services';
 import { useSession } from '../../../state/sessionStore';
-import { AppText, Banner, Button, Card, ListRow, Screen } from '../../../ui/components';
+import { AppText, Banner, Button, Card, EmptyState, ListRow, Screen } from '../../../ui/components';
 import { medicationSummary, responseSummary } from '../../../ui/features/medication/format';
 
 export default function MedicationListScreen() {
@@ -34,7 +34,11 @@ export default function MedicationListScreen() {
       <Button label="+ Registrar medicación" onPress={() => router.push('/registro/medicacion/nueva')} testID="medication-new" />
       {error ? <Banner tone="danger" message={error} /> : null}
       {items && items.length === 0 ? (
-        <AppText muted>Aún no has registrado ninguna toma.</AppText>
+        <EmptyState
+          icon="medical-outline"
+          title="Aún no has registrado ninguna toma"
+          message="Anota lo que tomas y cómo te sentó para verlo en tu evolución y en el informe."
+        />
       ) : null}
       {[...days.entries()].map(([day, list]) => (
         <View key={day}>

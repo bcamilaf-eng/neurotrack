@@ -12,7 +12,7 @@ import {
 } from '../../domain/community';
 import { getCommunity } from '../../state/services';
 import { useSession } from '../../state/sessionStore';
-import { AppText, Banner, Button, OptionGroup, Screen } from '../../ui/components';
+import { AppText, Banner, Button, EmptyState, OptionGroup, Screen } from '../../ui/components';
 import { JoinCommunity } from '../../ui/features/community/JoinCommunity';
 import { PostCard } from '../../ui/features/community/PostCard';
 import { useAppTheme } from '../../ui/theme/ThemeContext';
@@ -102,7 +102,13 @@ export default function CommunityScreen() {
       {error ? <Banner tone="danger" message={error} /> : null}
       {posts === null && !error ? <ActivityIndicator color={colors.primary} accessibilityLabel="Cargando temas" /> : null}
       {posts && posts.length === 0 ? (
-        <AppText muted>Aún no hay temas en esta categoría. ¡Abre el primero!</AppText>
+        <EmptyState
+          icon="chatbubbles-outline"
+          title="Aún no hay temas aquí"
+          message="Abre el primero y cuenta tu experiencia."
+          actionLabel="Nuevo tema"
+          onAction={() => router.push('/comunidad/nuevo')}
+        />
       ) : null}
       {posts?.map((post) => (
         <PostCard

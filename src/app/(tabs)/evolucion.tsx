@@ -19,9 +19,10 @@ import {
   Card,
   Disclaimer,
   LineChart,
+  EmptyState,
   ListRow,
-  OptionGroup,
   Screen,
+  SegmentedControl,
 } from '../../ui/components';
 import { FrequencyHeatmap } from '../../ui/features/evolution/FrequencyHeatmap';
 import { PatternInsightCard } from '../../ui/features/evolution/PatternInsightCard';
@@ -30,6 +31,7 @@ import { spacing } from '../../ui/theme';
 import { formatDuration } from '../../utils/time';
 
 const num = (n: number) => n.toLocaleString('es-ES');
+const PERIOD_OPTIONS = PERIODS.map((p) => (p.code === '12m' ? { ...p, short: '1 año' } : p));
 const percent = (part: number, total: number) => (total ? `${Math.round((part / total) * 100)} %` : '—');
 
 function Metric({ value, label }: { value: string; label: string }) {
@@ -64,7 +66,7 @@ export default function EvolutionScreen() {
   return (
     <Screen>
       <AppText variant="title">Mi evolución</AppText>
-      <OptionGroup label="Período" options={PERIODS} value={period} onChange={(v) => v && setPeriod(v)} />
+      <SegmentedControl label="Período" options={PERIOD_OPTIONS} value={period} onChange={setPeriod} testID="evolution-period" />
       {error ? <Banner tone="danger" message={error} /> : null}
       {!stats ? <AppText muted>Calculando…</AppText> : null}
 
@@ -92,7 +94,15 @@ export default function EvolutionScreen() {
           </Card>
 
           {stats.episodes === 0 ? (
-            <AppText muted>No hay episodios registrados en este período.</AppText>
+            <Card>
+              <EmptyState
+                icon="sunny-outline"
+                title="Sin episodios en este período"
+                message="Cuando registres un episodio verás aquí su frecuencia, intensidad y duración."
+                actionLabel="Registrar episodio"
+                onAction={() => router.push('/episodio/nuevo')}
+              />
+            </Card>
           ) : (
             <Card>
               <BarChart
@@ -121,7 +131,7 @@ export default function EvolutionScreen() {
           <Card>
             <AppText variant="heading">Medicación registrada</AppText>
             {med!.doses === 0 ? (
-              <AppText muted>No registraste tomas en este período.</AppText>
+              <EmptyState compact icon="medical-outline" title="Sin tomas en este período" message="Las tomas que registres aparecerán aquí con su respuesta." />
             ) : (
               <>
                 <AppText>
@@ -205,7 +215,7 @@ export default function EvolutionScreen() {
       <Card>
         <AppText variant="heading">Informe para tu consulta</AppText>
         <AppText muted>Resumen en PDF o CSV de tus episodios, medicación y observaciones, para compartir con tu profesional de salud.</AppText>
-        <Button label="Generar informe" onPress={() => router.push('/informe')} testID="open-report" />
+        <Button label="Generar informe" variant="secondary" icon="document-text-outline" onPress={() => router.push('/informe')} testID="open-report" />
       </Card>
       <Disclaimer />
     </Screen>
