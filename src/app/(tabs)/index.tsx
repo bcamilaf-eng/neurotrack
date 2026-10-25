@@ -17,6 +17,7 @@ import {
   Screen,
   useToast,
 } from '../../ui/components';
+import { ProfileButton } from '../../ui/features/dashboard/ProfileButton';
 import { QuickActions } from '../../ui/features/dashboard/QuickActions';
 import { TodayCard } from '../../ui/features/dashboard/TodayCard';
 import { TrendCard } from '../../ui/features/dashboard/TrendCard';
@@ -64,18 +65,23 @@ export default function HomeScreen() {
 
   return (
     <Screen>
-      {data?.name ? (
-        <View style={styles.greeting} accessible accessibilityRole="header" accessibilityLabel={`${greeting(now.getHours())}, ${data.name}`}>
-          <AppText variant="label" muted>
+      <View style={styles.header}>
+        {data?.name ? (
+          <View style={styles.greeting} accessible accessibilityRole="header" accessibilityLabel={`${greeting(now.getHours())}, ${data.name}`}>
+            <AppText variant="label" muted>
+              {greeting(now.getHours())}
+            </AppText>
+            <AppText variant="display" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {data.name}
+            </AppText>
+          </View>
+        ) : (
+          <AppText variant="display" style={styles.greeting}>
             {greeting(now.getHours())}
           </AppText>
-          <AppText variant="display" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
-            {data.name}
-          </AppText>
-        </View>
-      ) : (
-        <AppText variant="display">{greeting(now.getHours())}</AppText>
-      )}
+        )}
+        <ProfileButton name={data?.name} />
+      </View>
       {error ? <Banner tone="danger" message={error} /> : null}
 
       {data ? (
@@ -152,7 +158,8 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  greeting: { gap: 2, paddingRight: spacing.xxl },
+  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  greeting: { flex: 1, gap: 2 },
   metrics: { flexDirection: 'row', gap: spacing.lg },
   metric: { flex: 1, gap: 2 },
 });

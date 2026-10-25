@@ -1,49 +1,22 @@
-/** Barra de navegación inferior: Inicio, Registrar, Calendario, Evolución, Comunidad y Perfil. */
-import Ionicons from '@expo/vector-icons/Ionicons';
+/**
+ * Barra de navegación inferior: Inicio, Calendario, Registrar (botón central), Evolución y Comunidad.
+ * Perfil sigue siendo una pestaña, pero se abre desde el botón de perfil de Inicio.
+ */
 import { Tabs } from 'expo-router';
-import type { ComponentProps } from 'react';
-import { FONTS } from '../../ui/theme';
+import { NeuroTabBar, TAB_ITEMS } from '../../ui/features/navigation/TabBar';
 import { useAppTheme } from '../../ui/theme/ThemeContext';
-
-type IconName = ComponentProps<typeof Ionicons>['name'];
-
-const TABS: { name: string; title: string; icon: IconName; iconActive: IconName }[] = [
-  { name: 'index', title: 'Inicio', icon: 'home-outline', iconActive: 'home' },
-  { name: 'registrar', title: 'Registrar', icon: 'add-circle-outline', iconActive: 'add-circle' },
-  { name: 'calendario', title: 'Calendario', icon: 'calendar-outline', iconActive: 'calendar' },
-  { name: 'evolucion', title: 'Evolución', icon: 'stats-chart-outline', iconActive: 'stats-chart' },
-  { name: 'comunidad', title: 'Comunidad', icon: 'people-outline', iconActive: 'people' },
-  { name: 'perfil', title: 'Perfil', icon: 'person-circle-outline', iconActive: 'person-circle' },
-];
 
 export default function TabsLayout() {
   const { colors } = useAppTheme();
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, minHeight: 68, paddingTop: 6 },
-        // Seis pestañas: etiquetas compactas para que «Comunidad» quepa entera.
-        tabBarItemStyle: { paddingHorizontal: 0 },
-        tabBarLabelStyle: { fontSize: 10, fontFamily: FONTS.bodySemibold, letterSpacing: -0.1 },
-        sceneStyle: { backgroundColor: colors.background },
-      }}
+      tabBar={(props) => <NeuroTabBar {...props} />}
+      screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.background } }}
     >
-      {TABS.map((tab) => (
-        <Tabs.Screen
-          key={tab.name}
-          name={tab.name}
-          options={{
-            title: tab.title,
-            tabBarAccessibilityLabel: tab.title,
-            tabBarIcon: ({ color, focused, size }) => (
-              <Ionicons name={focused ? tab.iconActive : tab.icon} color={color} size={size} />
-            ),
-          }}
-        />
+      {TAB_ITEMS.map((tab) => (
+        <Tabs.Screen key={tab.name} name={tab.name} options={{ title: tab.title }} />
       ))}
+      <Tabs.Screen name="perfil" options={{ title: 'Perfil', href: null }} />
     </Tabs>
   );
 }
