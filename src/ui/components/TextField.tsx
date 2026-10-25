@@ -29,7 +29,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           styles.inputRow,
           {
             backgroundColor: colors.surface,
-            borderColor: error ? colors.danger : focused ? colors.focus : colors.border,
+            borderColor: error ? colors.danger : focused ? colors.focus : colors.borderStrong,
             borderWidth: focused || error ? 2 : 1,
           },
         ]}

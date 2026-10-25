@@ -98,5 +98,5 @@ const styles = StyleSheet.create({
   labels: { flexDirection: 'row' },
   labelCell: { flex: 1, alignItems: 'center', overflow: 'visible' },
   // Más ancha que su columna para que las fechas del mes no se corten.
-  label: { width: 32, textAlign: 'center', fontSize: 11 },
+  label: { width: 32, textAlign: 'center', fontSize: 12 },
 });

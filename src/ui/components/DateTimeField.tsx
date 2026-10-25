@@ -71,7 +71,7 @@ export function DateTimeField({ label, mode, value, onChange, maximumDate, error
           accessibilityLabel={`${label}: ${display(mode, value)}`}
           accessibilityHint="Abre el selector"
           onPress={openAndroid}
-          style={[styles.button, { backgroundColor: colors.surface, borderColor: error ? colors.danger : colors.border }]}
+          style={[styles.button, { backgroundColor: colors.surface, borderColor: error ? colors.danger : colors.borderStrong }]}
         >
           <AppText>{display(mode, value)}</AppText>
         </Pressable>

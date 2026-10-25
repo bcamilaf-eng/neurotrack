@@ -58,7 +58,7 @@ export function LineChart({ title, data, summary, max, height = 120 }: LineChart
         ))}
         {data.map((d, i) =>
           i % every === 0 ? (
-            <SvgText key={`${d.label}-${i}`} x={x(i)} y={height - 4} fontSize={10} fill={colors.textMuted} textAnchor="middle">
+            <SvgText key={`${d.label}-${i}`} x={x(i)} y={height - 4} fontSize={11} fill={colors.textMuted} textAnchor="middle">
               {d.label}
             </SvgText>
           ) : null,

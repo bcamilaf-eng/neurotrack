@@ -44,11 +44,11 @@ export function BarChart({ title, data, summary, max, format = String, height = 
             <G key={`${d.label}-${i}`}>
               {d.value ? <Rect x={x} y={plot + 4 - h} width={barWidth} height={h} rx={4} fill={colors.primary} /> : null}
               {d.value ? (
-                <SvgText x={x + barWidth / 2} y={plot - h} fontSize={10} fontFamily={FONTS.bodyMedium} fill={colors.text} textAnchor="middle">
+                <SvgText x={x + barWidth / 2} y={plot - h} fontSize={11} fontFamily={FONTS.bodyMedium} fill={colors.text} textAnchor="middle">
                   {format(d.value)}
                 </SvgText>
               ) : null}
-              <SvgText x={x + barWidth / 2} y={height - 4} fontSize={10} fontFamily={FONTS.bodyMedium} fill={colors.textMuted} textAnchor="middle">
+              <SvgText x={x + barWidth / 2} y={height - 4} fontSize={11} fontFamily={FONTS.bodyMedium} fill={colors.textMuted} textAnchor="middle">
                 {d.label}
               </SvgText>
             </G>

@@ -20,7 +20,7 @@ const RANGES = [
 function Stat({ value, label, period }: { value: string; label: string; period: string }) {
   return (
     <View style={styles.stat} accessible accessibilityLabel={`${label} en ${period}: ${value}`}>
-      <AppText variant="heading">{value}</AppText>
+      <AppText variant="stat">{value}</AppText>
       <AppText variant="caption" muted>
         {label}
       </AppText>

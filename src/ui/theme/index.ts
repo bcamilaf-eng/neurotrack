@@ -19,6 +19,8 @@ export interface Palette {
   surface: string;
   surfaceMuted: string;
   border: string;
+  /** Borde de campos y controles: al menos 3:1 sobre la superficie (WCAG 1.4.11). */
+  borderStrong: string;
   text: string;
   textMuted: string;
   primary: string;
@@ -37,6 +39,11 @@ export interface Palette {
   successSoft: string;
   focus: string;
   shadow: string;
+  /** Fondos del calendario por intensidad: tonos distinguibles entre sí, con texto legible encima. */
+  heatLow: string;
+  heatMid: string;
+  heatHigh: string;
+  heatNone: string;
 }
 
 export const lightPalette: Palette = {
@@ -44,6 +51,7 @@ export const lightPalette: Palette = {
   surface: '#FFFFFF',
   surfaceMuted: '#F1F5F9',
   border: '#E2E8F0',
+  borderStrong: '#7C8BA1',
   text: '#0F172A',
   textMuted: '#475569',
   primary: '#2563EB',
@@ -52,7 +60,7 @@ export const lightPalette: Palette = {
   primarySoft: '#EFF6FF',
   accent: '#059669',
   accentSoft: '#D1FAE5',
-  danger: '#DC2626',
+  danger: '#B91C1C',
   dangerSoft: '#FEF2F2',
   warning: '#B45309',
   warningSoft: '#FFFBEB',
@@ -60,6 +68,10 @@ export const lightPalette: Palette = {
   successSoft: '#ECFDF5',
   focus: '#2563EB',
   shadow: '#0F172A',
+  heatLow: '#DBEAFE',
+  heatMid: '#FDE68A',
+  heatHigh: '#FECACA',
+  heatNone: '#D1FAE5',
 };
 
 export const darkPalette: Palette = {
@@ -67,6 +79,7 @@ export const darkPalette: Palette = {
   surface: '#1E293B',
   surfaceMuted: '#273449',
   border: '#334155',
+  borderStrong: '#6B7C93',
   text: '#F1F5F9',
   textMuted: '#94A3B8',
   primary: '#60A5FA',
@@ -83,6 +96,10 @@ export const darkPalette: Palette = {
   successSoft: '#052E2B',
   focus: '#60A5FA',
   shadow: '#000000',
+  heatLow: '#1E3A8A',
+  heatMid: '#78350F',
+  heatHigh: '#7F1D1D',
+  heatNone: '#064E3B',
 };
 
 export const spacing = { xs: 4, sm: 8, md: 12, lg: 20, xl: 28, xxl: 40 } as const;
@@ -98,7 +115,7 @@ export const typography = {
   heading: { fontFamily: FONTS.display, fontSize: 18, lineHeight: 24, letterSpacing: -0.2 },
   body: { fontFamily: FONTS.body, fontSize: 16, lineHeight: 24 },
   label: { fontFamily: FONTS.bodySemibold, fontSize: 15, lineHeight: 20 },
-  caption: { fontFamily: FONTS.bodyMedium, fontSize: 13, lineHeight: 18 },
+  caption: { fontFamily: FONTS.bodyMedium, fontSize: 14, lineHeight: 20 },
   /** Cifras destacadas (resúmenes): números de ancho fijo para que no bailen. */
   stat: {
     fontFamily: FONTS.displayHeavy,

@@ -36,17 +36,17 @@ export function markerStyle(category: DayCategory, colors: Palette) {
  * así que el color nunca es la única pista.
  */
 export function dayTint(mark: DayMark, colors: Palette): string {
-  if (mark.maxIntensity === null) return mark.category === 'painFree' ? colors.successSoft : 'transparent';
-  if (mark.maxIntensity >= 7) return colors.dangerSoft;
-  if (mark.maxIntensity >= 4) return colors.warningSoft;
-  return colors.primarySoft;
+  if (mark.maxIntensity === null) return mark.category === 'painFree' ? colors.heatNone : 'transparent';
+  if (mark.maxIntensity >= 7) return colors.heatHigh;
+  if (mark.maxIntensity >= 4) return colors.heatMid;
+  return colors.heatLow;
 }
 
 export const INTENSITY_BANDS = [
-  { label: 'Leve (1–3)', tint: 'primarySoft' },
-  { label: 'Moderado (4–6)', tint: 'warningSoft' },
-  { label: 'Intenso (7–10)', tint: 'dangerSoft' },
-  { label: 'Sin dolor', tint: 'successSoft' },
+  { label: 'Leve (1–3)', tint: 'heatLow' },
+  { label: 'Moderado (4–6)', tint: 'heatMid' },
+  { label: 'Intenso (7–10)', tint: 'heatHigh' },
+  { label: 'Sin dolor', tint: 'heatNone' },
 ] as const;
 
 export function describeDay(mark: DayMark): string {
@@ -105,11 +105,12 @@ export function NeuroCalendar({ marks, blanks, selected, today, onSelect }: Neur
                     backgroundColor: dayTint(mark, colors),
                     borderColor: isSelected ? colors.focus : mark.date === today ? colors.border : 'transparent',
                     borderWidth: isSelected ? 2 : 1,
-                    opacity: future ? 0.4 : 1,
                   },
                 ]}
               >
-                <AppText variant="caption">{Number(mark.date.slice(8))}</AppText>
+                <AppText variant="caption" muted={future}>
+                  {Number(mark.date.slice(8))}
+                </AppText>
                 <View style={styles.markerSlot}>
                   {marker ? (
                     <View

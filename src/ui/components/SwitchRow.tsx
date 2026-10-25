@@ -29,9 +29,9 @@ export function SwitchRow({ label, description, value, onChange, disabled }: Swi
         value={value}
         onValueChange={onChange}
         disabled={disabled}
-        trackColor={{ true: colors.primary, false: colors.border }}
+        trackColor={{ true: colors.primary, false: colors.borderStrong }}
         thumbColor="#FFFFFF"
-        ios_backgroundColor={colors.border}
+        ios_backgroundColor={colors.borderStrong}
       />
     </View>
   );

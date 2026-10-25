@@ -25,7 +25,7 @@ export function HeadMap({ selected, onToggle }: HeadMapProps) {
     onPress: () => onToggle(code),
   });
   const outline = { fill: colors.surface, stroke: colors.textMuted, strokeWidth: 2 };
-  const label = { fill: colors.textMuted, fontSize: 9, textAnchor: 'middle' as const };
+  const label = { fill: colors.textMuted, fontSize: 10, textAnchor: 'middle' as const };
 
   return (
     <View style={styles.wrapper} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>

@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   },
   pill: { position: 'absolute', left: 0, top: PILL_INSET, bottom: PILL_INSET, borderRadius: radius.lg },
   tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2, height: '100%' },
-  label: { fontSize: 10, lineHeight: 13 },
+  label: { fontSize: 11, lineHeight: 14 },
   center: {
     width: 60,
     height: 60,

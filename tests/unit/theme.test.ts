@@ -20,6 +20,13 @@ const TEXT_PAIRS: [keyof Palette, keyof Palette][] = [
   ['success', 'surface'],
   ['success', 'successSoft'],
   ['danger', 'surface'],
+  ['danger', 'dangerSoft'],
+  ['onPrimary', 'danger'],
+  ['text', 'heatLow'],
+  ['text', 'heatMid'],
+  ['text', 'heatHigh'],
+  ['text', 'heatNone'],
+  ['textMuted', 'surfaceMuted'],
   ['warning', 'surface'],
 ];
 
@@ -28,6 +35,8 @@ const GRAPHIC_PAIRS: [keyof Palette, keyof Palette][] = [
   ['accent', 'surface'],
   ['primary', 'surfaceMuted'],
   ['focus', 'surface'],
+  ['borderStrong', 'surface'],
+  ['borderStrong', 'background'],
 ];
 
 describe.each([
