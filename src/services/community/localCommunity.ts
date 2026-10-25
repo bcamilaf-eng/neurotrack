@@ -13,10 +13,12 @@ import {
   type CommunityProfile,
   type CommunityReply,
   joinCommunitySchema,
+  type ModerationItem,
   postInputSchema,
   replyInputSchema,
   REPORT_HIDE_THRESHOLD,
   reportInputSchema,
+  type ReportReason,
   type ReportTarget,
 } from '../../domain/community';
 import { clock } from '../../utils/clock';
@@ -44,7 +46,30 @@ interface ReplyRow {
   created_at: string;
 }
 
+interface ModerationRow {
+  kind: ReportTarget['kind'];
+  id: string;
+  post_id: string;
+  title: string | null;
+  body: string;
+  author_alias: string;
+  created_at: string;
+  hidden: number;
+  reports: number;
+  reasons: string;
+}
+
 const TABLE = { post: 'community_posts', reply: 'community_replies' } as const;
+
+/** Lo reportado y no borrado de una tabla, con cuántos reportes tiene y por qué. */
+const reported = (kind: ReportTarget['kind']) => `
+  SELECT '${kind}' AS kind, t.id, ${kind === 'post' ? 't.id' : 't.post_id'} AS post_id,
+    ${kind === 'post' ? 't.title' : 'NULL'} AS title, t.body AS body, t.author_alias AS author_alias,
+    t.created_at AS created_at, t.hidden AS hidden,
+    COUNT(r.id) AS reports, GROUP_CONCAT(DISTINCT r.reason) AS reasons
+  FROM ${TABLE[kind]} t JOIN community_reports r ON r.target_kind = '${kind}' AND r.target_id = t.id
+  WHERE t.deleted_at IS NULL
+  GROUP BY t.id`;
 
 /** Visible para `?`: no borrado, no oculto y no reportado por esa persona. */
 const visible = (alias: string, kind: 'post' | 'reply') => `
@@ -230,6 +255,48 @@ export function createLocalCommunityService(db: SqlDatabase): CommunityService {
         [now, now, target.id, userId],
       );
       if (result.changes === 0) throw new NotFoundError();
+    },
+
+    // En el modo local no hay otras personas que revisen: quien usa el teléfono modera.
+    async isModerator() {
+      return true;
+    },
+
+    async moderationQueue() {
+      const rows = await db.all<ModerationRow>(
+        `${reported('post')} UNION ALL ${reported('reply')} ORDER BY hidden DESC, reports DESC, created_at DESC`,
+      );
+      return rows.map(
+        (row): ModerationItem => ({
+          kind: row.kind,
+          id: row.id,
+          postId: row.post_id,
+          title: row.title,
+          body: row.body,
+          authorAlias: row.author_alias,
+          createdAt: row.created_at,
+          hidden: Boolean(row.hidden),
+          reports: Number(row.reports),
+          reasons: row.reasons.split(',') as ReportReason[],
+        }),
+      );
+    },
+
+    async moderate(_userId, target, action) {
+      const table = TABLE[target.kind];
+      const now = clock.now().toISOString();
+      await db.transaction(async () => {
+        if (action === 'restore') {
+          await db.run(`UPDATE ${table} SET hidden = 0 WHERE id = ?`, [target.id]);
+          await db.run('DELETE FROM community_reports WHERE target_kind = ? AND target_id = ?', [target.kind, target.id]);
+        } else {
+          await db.run(`UPDATE ${table} SET deleted_at = ?, updated_at = ? WHERE id = ? AND deleted_at IS NULL`, [
+            now,
+            now,
+            target.id,
+          ]);
+        }
+      });
     },
   };
 

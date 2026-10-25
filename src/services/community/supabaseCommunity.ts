@@ -12,6 +12,7 @@ import {
   type CommunityPost,
   type CommunityReply,
   joinCommunitySchema,
+  type ModerationItem,
   postInputSchema,
   replyInputSchema,
   reportInputSchema,
@@ -46,7 +47,20 @@ interface ReplyRow {
   author: Author;
 }
 
-const aliasOf = (author: Author) => (Array.isArray(author) ? author[0]?.alias : author?.alias) ?? 'Anónimo';
+interface ModerationRow {
+  kind: ReportTarget['kind'];
+  id: string;
+  post_id: string;
+  title: string | null;
+  body: string;
+  author_alias: string;
+  created_at: string;
+  hidden: boolean;
+  reports: number | string;
+  reasons: ModerationItem['reasons'];
+}
+
+const aliasOf =(author: Author) => (Array.isArray(author) ? author[0]?.alias : author?.alias) ?? 'Anónimo';
 
 class CommunityNetworkError extends Error {
   constructor() {
@@ -173,6 +187,34 @@ export function createSupabaseCommunityService(client: SupabaseClient): Communit
         .eq('author_id', userId);
       if (error) throw new CommunityNetworkError();
       if (count === 0) throw new NotFoundError();
+    },
+
+    // Las funciones del servidor comprueban por su cuenta que quien llama sea moderador
+    // (supabase/migrations/20261025000000_moderacion.sql).
+    async isModerator() {
+      return check(await client.rpc('community_is_moderator')) === true;
+    },
+
+    async moderationQueue() {
+      const rows = check(await client.rpc('community_moderation_queue')) as ModerationRow[];
+      return rows.map(
+        (row): ModerationItem => ({
+          kind: row.kind,
+          id: row.id,
+          postId: row.post_id,
+          title: row.title,
+          body: row.body,
+          authorAlias: row.author_alias,
+          createdAt: row.created_at,
+          hidden: row.hidden,
+          reports: Number(row.reports),
+          reasons: row.reasons,
+        }),
+      );
+    },
+
+    async moderate(_userId, target, action) {
+      check(await client.rpc('community_moderate', { target_kind: target.kind, target_id: target.id, action }));
     },
   };
 }

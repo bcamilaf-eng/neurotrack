@@ -13,6 +13,8 @@ import type {
   CommunityProfile,
   CommunityReply,
   JoinCommunityInput,
+  ModerationAction,
+  ModerationItem,
   PostInput,
   ReplyInput,
   ReportInput,
@@ -33,6 +35,11 @@ export interface CommunityService {
   report(userId: string, target: ReportTarget, input: ReportInput): Promise<void>;
   /** Solo borra contenido propio. */
   remove(userId: string, target: ReportTarget): Promise<void>;
+  /** Puede revisar lo reportado. En modo local, quien usa el teléfono siempre puede. */
+  isModerator(userId: string): Promise<boolean>;
+  /** Lo reportado y no borrado: primero lo oculto, luego lo más reportado. Solo moderadores. */
+  moderationQueue(userId: string): Promise<ModerationItem[]>;
+  moderate(userId: string, target: ReportTarget, action: ModerationAction): Promise<void>;
 }
 
 export class AliasTakenError extends Error {

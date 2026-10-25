@@ -1,8 +1,10 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
+import { Alert } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import CommunityScreen from '../../src/app/(tabs)/comunidad';
+import ModerationScreen from '../../src/app/comunidad/moderacion';
 import NewPostScreen from '../../src/app/comunidad/nuevo';
 import { CURRENT_CONSENT_VERSION } from '../../src/domain/catalogs';
 import { createLocalAuthService } from '../../src/services/auth/localAuth';
@@ -79,5 +81,26 @@ describe('comunidad', () => {
     await waitFor(() => expect(router.replace).toHaveBeenCalled());
     const [mine] = await community.listPosts(userId);
     expect(mine).toMatchObject({ title: '¿Os pasa con el calor?', category: 'questions', authorAlias: 'Luna', mine: true });
+  });
+
+  it('quien modera ve lo reportado y lo puede eliminar', async () => {
+    const userId = useSession.getState().user!.id;
+    const community = await getCommunity();
+    await community.join(userId, { alias: 'Luna', acceptedRules: true });
+    await community.join('otra', { alias: 'Sol', acceptedRules: true });
+    const reported = await community.createPost('otra', { category: 'tips', title: 'Prueba esta pastilla', body: 'Tómate dos al día.' });
+    await community.report(userId, { kind: 'post', id: reported.id }, { reason: 'medical_advice' });
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
+      buttons?.find((b) => b.style === 'destructive')?.onPress?.();
+    });
+
+    await renderScreen(<ModerationScreen />);
+    expect(await screen.findByText('Prueba esta pastilla')).toBeTruthy();
+    expect(screen.getByText(/Receta o recomienda medicamentos/)).toBeTruthy();
+    await fireEvent.press(screen.getByTestId(`moderation-remove-${reported.id}`));
+
+    expect(await screen.findByText('Nada por revisar')).toBeTruthy();
+    expect(alert).toHaveBeenCalledWith('¿Eliminar el tema?', expect.any(String), expect.any(Array));
+    expect(await community.moderationQueue(userId)).toEqual([]);
   });
 });

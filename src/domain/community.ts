@@ -134,3 +134,27 @@ export interface CommunityReply {
 }
 
 export type ReportTarget = { kind: 'post' | 'reply'; id: string };
+
+/** Algo reportado al menos una vez, tal como lo ve quien modera. */
+export interface ModerationItem {
+  kind: ReportTarget['kind'];
+  id: string;
+  /** Tema al que pertenece (el propio id si es un tema). */
+  postId: string;
+  /** Solo los temas tienen título. */
+  title: string | null;
+  body: string;
+  authorAlias: string;
+  createdAt: string;
+  /** Ya no lo ve nadie por haber llegado al umbral de reportes. */
+  hidden: boolean;
+  reports: number;
+  reasons: ReportReason[];
+}
+
+/** Restaurar vuelve a mostrarlo y descarta sus reportes; eliminar lo borra para todos. */
+export type ModerationAction = 'restore' | 'remove';
+
+export function reportReasonLabel(code: ReportReason): string {
+  return REPORT_REASONS.find((r) => r.code === code)?.label ?? code;
+}

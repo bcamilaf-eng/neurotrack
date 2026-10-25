@@ -17,6 +17,7 @@ export default function CommunityLayout() {
     >
       <Stack.Screen name="[id]" options={{ title: 'Tema' }} />
       <Stack.Screen name="nuevo" options={{ title: 'Nuevo tema', presentation: 'modal' }} />
+      <Stack.Screen name="moderacion" options={{ title: 'Moderación' }} />
     </Stack>
   );
 }

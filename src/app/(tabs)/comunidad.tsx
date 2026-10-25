@@ -30,6 +30,7 @@ export default function CommunityScreen() {
   const [posts, setPosts] = useState<CommunityPost[] | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
   const [mode, setMode] = useState<'cloud' | 'local' | null>(null);
+  const [moderator, setModerator] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(
@@ -44,7 +45,12 @@ export default function CommunityScreen() {
         const joined = current && current.rulesVersion === COMMUNITY_RULES_VERSION ? current : null;
         setProfile(joined);
         if (joined) {
-          setPosts(await community.listPosts(user.id, { category: category === 'all' ? undefined : category }));
+          const [list, canModerate] = await Promise.all([
+            community.listPosts(user.id, { category: category === 'all' ? undefined : category }),
+            community.isModerator(user.id).catch(() => false),
+          ]);
+          setPosts(list);
+          setModerator(canModerate);
         }
       } catch (e) {
         setProfile((p) => p ?? null);
@@ -89,6 +95,15 @@ export default function CommunityScreen() {
       <AppText muted>Participas como {profile.alias}.</AppText>
       {mode === 'local' ? <Banner tone="info" message={LOCAL_COMMUNITY_NOTICE} /> : null}
       <Button label="+ Nuevo tema" onPress={() => router.push('/comunidad/nuevo')} testID="community-new" />
+      {moderator ? (
+        <Button
+          label="Revisar lo reportado"
+          variant="secondary"
+          icon="shield-checkmark-outline"
+          onPress={() => router.push('/comunidad/moderacion')}
+          testID="community-moderation"
+        />
+      ) : null}
       <OptionGroup
         label="Categoría"
         options={FILTERS}

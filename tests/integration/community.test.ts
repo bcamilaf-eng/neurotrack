@@ -123,6 +123,51 @@ describe('reportes', () => {
   });
 });
 
+describe('moderación', () => {
+  const reporters = ['user-3', 'user-4', 'user-5'];
+  let hiddenPost: string;
+  let reportedReply: string;
+
+  beforeEach(async () => {
+    await community.join(USER_ID, { alias: 'Luna', acceptedRules: true });
+    for (const [i, id] of [OTHER_USER_ID, ...reporters].entries()) {
+      await community.join(id, { alias: `Persona${i}`, acceptedRules: true });
+    }
+    hiddenPost = (await community.createPost(USER_ID, post)).id;
+    for (const [i, id] of reporters.entries()) {
+      await community.report(id, { kind: 'post', id: hiddenPost }, { reason: i === 0 ? 'spam' : 'medical_advice' });
+    }
+    const other = await community.createPost(OTHER_USER_ID, { ...post, title: 'Otro tema' });
+    reportedReply = (await community.createReply(USER_ID, other.id, { body: 'Toma tal pastilla.' })).id;
+    await community.report(OTHER_USER_ID, { kind: 'reply', id: reportedReply }, { reason: 'medical_advice' });
+  });
+
+  it('en modo local quien usa el teléfono modera', async () => {
+    expect(await community.isModerator(USER_ID)).toBe(true);
+  });
+
+  it('lista lo reportado, primero lo oculto, con sus motivos', async () => {
+    const queue = await community.moderationQueue(USER_ID);
+    expect(queue).toHaveLength(2);
+    expect(queue[0]).toMatchObject({ kind: 'post', id: hiddenPost, hidden: true, reports: 3, title: 'Lo que me ayuda', authorAlias: 'Luna' });
+    expect([...queue[0].reasons].sort()).toEqual(['medical_advice', 'spam']);
+    expect(queue[1]).toMatchObject({ kind: 'reply', id: reportedReply, hidden: false, reports: 1, title: null, reasons: ['medical_advice'] });
+  });
+
+  it('restaurar lo vuelve a mostrar a todos y descarta sus reportes', async () => {
+    await community.moderate(USER_ID, { kind: 'post', id: hiddenPost }, 'restore');
+    expect((await community.listPosts(reporters[0])).map((p) => p.id)).toContain(hiddenPost);
+    expect((await community.moderationQueue(USER_ID)).map((i) => i.id)).toEqual([reportedReply]);
+  });
+
+  it('eliminar lo borra para todos y sale de la cola', async () => {
+    await community.moderate(USER_ID, { kind: 'reply', id: reportedReply }, 'remove');
+    expect((await community.moderationQueue(USER_ID)).map((i) => i.id)).toEqual([hiddenPost]);
+    const [other] = await community.listPosts(USER_ID, { category: 'tips' });
+    expect((await community.getThread(USER_ID, other.id)).replies).toHaveLength(0);
+  });
+});
+
 describe('eliminar la cuenta', () => {
   it('borra seudónimo, temas, respuestas y reportes de esa persona', async () => {
     const repos = createRepositories(db);
