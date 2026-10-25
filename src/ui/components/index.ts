@@ -22,3 +22,4 @@ export { ToastProvider, useToast } from './Toast';
 export { FadeIn } from './FadeIn';
 export { DayBars } from './DayBars';
 export { EmptyState } from './EmptyState';
+export { Collapsible } from './Collapsible';

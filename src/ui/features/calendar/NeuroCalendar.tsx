@@ -30,6 +30,25 @@ export function markerStyle(category: DayCategory, colors: Palette) {
   }
 }
 
+/**
+ * Fondo suave del día según la intensidad máxima: azul (leve, 1–3), ámbar (moderado, 4–6),
+ * rojo (intenso, 7–10) y verde si se marcó sin dolor. El símbolo sigue indicando la categoría,
+ * así que el color nunca es la única pista.
+ */
+export function dayTint(mark: DayMark, colors: Palette): string {
+  if (mark.maxIntensity === null) return mark.category === 'painFree' ? colors.successSoft : 'transparent';
+  if (mark.maxIntensity >= 7) return colors.dangerSoft;
+  if (mark.maxIntensity >= 4) return colors.warningSoft;
+  return colors.primarySoft;
+}
+
+export const INTENSITY_BANDS = [
+  { label: 'Leve (1–3)', tint: 'primarySoft' },
+  { label: 'Moderado (4–6)', tint: 'warningSoft' },
+  { label: 'Intenso (7–10)', tint: 'dangerSoft' },
+  { label: 'Sin dolor', tint: 'successSoft' },
+] as const;
+
 export function describeDay(mark: DayMark): string {
   const parts = [format(parseISO(mark.date), "EEEE d 'de' MMMM", { locale: es }), DAY_CATEGORY_LABELS[mark.category]];
   if (mark.maxIntensity !== null) parts.push(`intensidad máxima ${mark.maxIntensity} de 10`);
@@ -83,6 +102,7 @@ export function NeuroCalendar({ marks, blanks, selected, today, onSelect }: Neur
                   styles.cell,
                   styles.day,
                   {
+                    backgroundColor: dayTint(mark, colors),
                     borderColor: isSelected ? colors.focus : mark.date === today ? colors.border : 'transparent',
                     borderWidth: isSelected ? 2 : 1,
                     opacity: future ? 0.4 : 1,
@@ -133,6 +153,14 @@ export function CalendarLegend() {
           </View>
         );
       })}
+      <View style={styles.bands}>
+        {INTENSITY_BANDS.map((band) => (
+          <View key={band.label} style={styles.legendItem}>
+            <View style={[styles.swatch, { backgroundColor: colors[band.tint], borderColor: colors.border }]} />
+            <AppText variant="caption">{band.label}</AppText>
+          </View>
+        ))}
+      </View>
       <View style={styles.legendItem}>
         <View style={[styles.pill, { backgroundColor: colors.accent }]} />
         <AppText variant="caption">Medicación utilizada</AppText>
@@ -148,11 +176,13 @@ const styles = StyleSheet.create({
   wrapper: { gap: 2 },
   row: { flexDirection: 'row' },
   cell: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 24 },
-  day: { minHeight: MIN_TOUCH + 12, borderRadius: radius.sm, paddingVertical: 2, gap: 1 },
+  day: { minHeight: MIN_TOUCH + 12, borderRadius: radius.sm, paddingVertical: 2, gap: 1, marginHorizontal: 1 },
   markerSlot: { height: 20, justifyContent: 'center' },
   marker: { width: 20, height: 20, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   symbol: { fontWeight: '700', lineHeight: 16 },
   pill: { width: 16, height: 4, borderRadius: 2 },
   legend: { gap: spacing.sm },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  bands: { flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing.lg, rowGap: spacing.sm },
+  swatch: { width: 18, height: 18, borderRadius: radius.sm - 4, borderWidth: StyleSheet.hairlineWidth },
 });

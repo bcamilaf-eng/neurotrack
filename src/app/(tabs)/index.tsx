@@ -64,10 +64,18 @@ export default function HomeScreen() {
 
   return (
     <Screen>
-      <AppText variant="display">
-        {greeting(now.getHours())}
-        {data?.name ? `, ${data.name}` : ''}
-      </AppText>
+      {data?.name ? (
+        <View style={styles.greeting} accessible accessibilityRole="header" accessibilityLabel={`${greeting(now.getHours())}, ${data.name}`}>
+          <AppText variant="label" muted>
+            {greeting(now.getHours())}
+          </AppText>
+          <AppText variant="display" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+            {data.name}
+          </AppText>
+        </View>
+      ) : (
+        <AppText variant="display">{greeting(now.getHours())}</AppText>
+      )}
       {error ? <Banner tone="danger" message={error} /> : null}
 
       {data ? (
@@ -144,6 +152,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  greeting: { gap: 2, paddingRight: spacing.xxl },
   metrics: { flexDirection: 'row', gap: spacing.lg },
   metric: { flex: 1, gap: 2 },
 });

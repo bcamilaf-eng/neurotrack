@@ -13,7 +13,7 @@ import { shareJson } from '../../../services/export/fileExport';
 import { getRepositories } from '../../../state/services';
 import { useSession } from '../../../state/sessionStore';
 import { useSync } from '../../../state/syncStore';
-import { AppText, Banner, Button, Card, ListRow, Screen, SwitchRow } from '../../../ui/components';
+import { AppText, Banner, Button, Card, Collapsible, ListRow, Screen, SwitchRow } from '../../../ui/components';
 import { clock } from '../../../utils/clock';
 import { confirmDestructive } from '../../../ui/confirm';
 
@@ -105,13 +105,13 @@ export default function PrivacyScreen() {
 
   return (
     <Screen edges={['left', 'right']}>
-      <Card>
+      <Collapsible title="Cómo protegemos tus datos">
         {PRIVACY_SUMMARY.map((line) => (
           <AppText key={line} variant="caption">
             • {line}
           </AppText>
         ))}
-      </Card>
+      </Collapsible>
       {error ? <Banner tone="danger" message={error} /> : null}
       <AppText variant="heading">Consentimientos opcionales</AppText>
       {OPTIONAL.map((type) => (
