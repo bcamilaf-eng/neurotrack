@@ -7,7 +7,7 @@ export interface LegalSection {
   paragraphs: string[];
 }
 
-export const LEGAL_VERSION = '2026-10-18';
+export const LEGAL_VERSION = '2026-10-25';
 export const LEGAL_DRAFT_NOTICE = 'Borrador pendiente de revisión legal antes de la publicación.';
 
 export const PRIVACY_POLICY: LegalSection[] = [
@@ -35,7 +35,8 @@ export const PRIVACY_POLICY: LegalSection[] = [
     title: 'Dónde se guardan',
     paragraphs: [
       'Tus registros de salud y tu perfil se guardan en tu teléfono, en una base de datos cifrada (AES-256 con SQLCipher). La clave se genera en el dispositivo y se guarda en el almacén seguro del sistema (Keychain o Keystore).',
-      'Tu cuenta (email y contraseña protegida) y lo que publicas en la comunidad se guardan en servidores de Supabase en la Unión Europea, con cifrado en tránsito y en reposo y acceso controlado por reglas que solo te dejan ver y modificar lo tuyo.',
+      'Tu cuenta (email y contraseña protegida) y lo que publicas en la comunidad se guardan en servidores de Supabase en Canadá, con cifrado en tránsito y en reposo y acceso controlado por reglas que solo te dejan ver y modificar lo tuyo.',
+      'Si vives fuera de Canadá, esto supone una transferencia internacional de datos. Supabase actúa como encargado del tratamiento bajo un acuerdo que le exige protegerlos con garantías equivalentes a las de tu país, y no puede usarlos para fines propios.',
       'Si en el futuro activas la sincronización en la nube, tus registros se copiarán a esos mismos servidores con las mismas protecciones.',
     ],
   },

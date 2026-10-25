@@ -2,7 +2,8 @@
 
 ## 1. Backend (Supabase)
 
-1. Crea un proyecto en [supabase.com](https://supabase.com) en una **región de la UE** (datos de salud).
+1. Crea un proyecto en [supabase.com](https://supabase.com). El proyecto actual está en **Canadá (ca-central-1)**, la región
+   más cercana para usuarios de Latinoamérica; si la app se abre a la UE, conviene un proyecto en Europa.
 2. Aplica el esquema:
    ```bash
    npx supabase link --project-ref TU_PROYECTO

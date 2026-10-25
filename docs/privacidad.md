@@ -5,7 +5,7 @@ Cómo cubre NeuroTrack cada punto del apartado 19 de la especificación.
 | Requisito | Implementación |
 | --- | --- |
 | Autenticación segura | Supabase Auth (email y contraseña, confirmación de email) o cuentas locales (solo para pruebas) con sal y SHA-256 iterado, y bloqueo tras intentos fallidos (`src/services/auth`). Sesión en el almacén seguro del sistema, troceada si es larga. |
-| Cifrado | Base local SQLCipher (AES-256) con clave aleatoria de 256 bits en Keychain/Keystore (`src/data/db/expoDatabase.ts`). En la nube, TLS y cifrado en reposo de Supabase (región UE). |
+| Cifrado | Base local SQLCipher (AES-256) con clave aleatoria de 256 bits en Keychain/Keystore (`src/data/db/expoDatabase.ts`). En la nube, TLS y cifrado en reposo de Supabase (región Canadá, ca-central-1). |
 | Control de acceso | Cada consulta filtra por `user_id`; en Supabase, Row Level Security en todas las tablas (`supabase/tests/rls_isolation.sql`). |
 | Protección de sesiones | Bloqueo con Face ID, huella o código al abrir la app y tras 0, 1, 5 o 15 minutos en segundo plano. Las sesiones caducan. |
 | Eliminación de cuenta | Perfil › Privacidad › Eliminar mi cuenta: borra cuenta y datos locales y, con Supabase, la función `delete-account`. |
