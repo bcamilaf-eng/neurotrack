@@ -40,7 +40,13 @@ jobs:
           CI: 1
       - name: Compilar APK
         working-directory: android
-        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a,x86_64 --no-daemon
+        # Reintenta si falla la descarga de Gradle (services.gradle.org a veces responde 502).
+        run: |
+          for i in 1 2 3 4; do
+            ./gradlew --version > /dev/null && break
+            echo "Descarga de Gradle falló (intento $i), reintentando..."; sleep $((i * 15))
+          done
+          ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a,x86_64 --no-daemon
         env:
           NODE_ENV: production
       - name: Publicar la versión
