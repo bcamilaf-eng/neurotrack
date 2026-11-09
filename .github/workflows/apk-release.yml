@@ -1,0 +1,56 @@
+name: Publicar APK
+
+# Compila el APK de Android y lo publica como versión (Release) del repositorio.
+# Enlace fijo de descarga de la última versión:
+#   https://github.com/bcamilaf-eng/neurotrack/releases/latest/download/NeuroTrack.apk
+
+on:
+  push:
+    branches: [claude/project-thread-dsztuo]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-release
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      # Valores públicos del cliente (van dentro de cada APK; los protege RLS).
+      EXPO_PUBLIC_SUPABASE_URL: https://nozuatctwojgfpsrfpzj.supabase.co
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5venVhdGN0d29qZ2Zwc3JmcHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIyODM2NDAsImV4cCI6MjEwNzg1OTY0MH0.U_txiwmasa0j0g--RGjMXLAm-m5l_XNyf55gpPNsdCY
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - run: npx expo prebuild --platform android --no-install
+        env:
+          CI: 1
+      - name: Compilar APK
+        working-directory: android
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a,x86_64 --no-daemon
+        env:
+          NODE_ENV: production
+      - name: Publicar la versión
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk NeuroTrack.apk
+          TAG="v$(date -u +%Y.%m.%d)-${GITHUB_SHA::7}"
+          gh release create "$TAG" NeuroTrack.apk \
+            --target "$GITHUB_SHA" \
+            --title "NeuroTrack $(date -u +%Y-%m-%d)" \
+            --notes "Versión de prueba para instalar a mano en Android (firmada con clave de desarrollo). Descarga: NeuroTrack.apk" \
+            --latest
